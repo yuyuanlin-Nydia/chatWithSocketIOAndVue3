@@ -1,0 +1,18 @@
+UI畫面:https://dribbble.com/shots/5922457/attachments/1273904?mode=media
+
+*vue使用fontawesome
+https://fontawesome.com/docs/web/use-with/vue/add-icons
+
+*API文件教學(chat APP)
+https://socket.io/get-started/private-messaging-part-1/
+
+*eslint設定
+發現eslint會在vscode terminal報錯，但並不會在code上提示(紅底線)，找了很久  
+才發現因為vscode一次開啟兩個專案，eslint會找不到正確的設定
+需要另外設定"eslint.workingDirectories": ["./"],
+https://github.com/microsoft/vscode-eslint/issues/696
+
+使用SCSS=>npm install -D sass-loader node-sass
+https://hackmd.io/@s_jpXuNwRQiUuGCOQAOZuA/rkZhZEBHc
+終端機報錯找不到變數，後來重新安裝，將版本從7>10.1.1才正常
+SCSS顏色變數黨全局引入:https://hackmd.io/@s_jpXuNwRQiUuGCOQAOZuA/rkZhZEBHc
