@@ -21,6 +21,7 @@ module.exports = {
     'semi': 'error',
     'quotes': ['error','single'],
     'indent': ["error", 2],
-    'vue/no-unused-components': process.env.NODE_ENV === 'production' ? 1 : 0
+    'vue/no-unused-components': process.env.NODE_ENV === 'production' ? 1 : 0,
+    'standard/no-callback-literal': [0, ['cb', 'callback']]
   }
 }
