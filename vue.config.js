@@ -13,7 +13,19 @@ module.exports = {
       }
     }
   },
+
   chainWebpack: (config) => {
     config.module.rule('javascript/auto').test(/\.mjs$/).end()
-  }
+  },
+
+  pluginOptions: {
+    quasar: {
+      importStrategy: 'kebab',
+      rtlSupport: false
+    }
+  },
+
+  transpileDependencies: [
+    'quasar'
+  ]
 }

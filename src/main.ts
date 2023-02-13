@@ -10,6 +10,8 @@ import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 import { faBars, faGear, faPaperPlane } from '@fortawesome/free-solid-svg-icons'
 import { faComment } from '@fortawesome/free-regular-svg-icons'
 import { initializeApp } from 'firebase/app'
+import { Quasar } from 'quasar'
+import quasarUserOptions from './quasar-user-options'
 
 const firebaseConfig = {
   apiKey: 'AIzaSyCZ5vQpxh5U2RAKeo2TK50mCe9trs7hN9A',
@@ -22,7 +24,7 @@ const firebaseConfig = {
 initializeApp(firebaseConfig)
 
 library.add(faBars, faGear, faComment, faPaperPlane)
-createApp(App)
+createApp(App).use(Quasar, quasarUserOptions)
   .use(store)
   .use(router)
   .component('font-awesome-icon', FontAwesomeIcon)
