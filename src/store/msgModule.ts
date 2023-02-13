@@ -1,7 +1,8 @@
 
 import socket from '@/utilities/socketConnection'
+import { Module } from 'vuex'
 
-const msgStore = {
+const msgModule: Module<any, any> = {
   state: {
     // 目前聊天視窗都是1對1 =>之後可能增加群組聊天 =>建立roomID 和 userId
     // 假設自己的USERID 898989
@@ -110,4 +111,4 @@ const msgStore = {
   }
 }
 
-export default msgStore
+export default msgModule

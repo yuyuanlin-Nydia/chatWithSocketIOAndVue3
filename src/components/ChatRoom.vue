@@ -29,9 +29,8 @@ export default defineComponent({
   components: { CharacterBox },
   setup () {
     const store = useStore()
-    // eslint-disable-next-line no-undef
     const allRooms = computed(function () {
-      return store.state.msgStore.allRooms
+      return store.state.msgModule.allRooms
     })
     return {
       // roomData,

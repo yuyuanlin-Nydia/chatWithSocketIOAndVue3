@@ -19,7 +19,7 @@ export default defineComponent({
   },
   setup () {
     const store = useStore()
-    const msgState = store.state.msgStore
+    const msgState = store.state.msgModule
     const currentUserId = computed(() => msgState.currentUserId)
     const allRooms = computed(() => msgState.allRooms)
 
