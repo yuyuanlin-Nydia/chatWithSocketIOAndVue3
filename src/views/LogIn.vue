@@ -85,7 +85,7 @@ async function logInDispatch () {
   })
 }
 function signUpDispatch () {
-  store.dispatch('signup', {
+  store.dispatch('signUp', {
     userName: userName.value,
     userPassword: userPassword.value
   })
