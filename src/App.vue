@@ -1,32 +1,10 @@
 <template>
   <div id="main">
-    <MenuBar v-if="isLogIn" />
     <div class="view">
-      <!-- <router-link to="/">Chat</router-link> |
-      <router-link to="/Setting">Setting</router-link> -->
       <router-view />
     </div>
   </div>
 </template>
-
-<script lang="ts">
-import { defineComponent, computed } from 'vue'
-import MenuBar from '@/components/MenuBar.vue'
-import { useStore } from 'vuex'
-export default defineComponent({
-  name: 'App',
-  components: {
-    MenuBar
-  },
-  setup () {
-    const store = useStore()
-    return {
-      isLogIn: computed(() => store.state.appStore.isLogIn)
-    }
-  }
-
-})
-</script>
 
 <style lang="scss">
 body{

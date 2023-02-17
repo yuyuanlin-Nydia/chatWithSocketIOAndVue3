@@ -2,28 +2,27 @@
   <div class="loginBox">
     <div class="login">
       <form @submit.prevent="onSubmit">
-        <h1 class="title">
-          Hi,Welcome!256
-        </h1>
-        <h6 class="subTitle">
+        <h5 class="title">
+          Hi,Welcome!
+        </h5>
+        <p class="subTitle">
           Begin a conversation and have a good day.
-        </h6>
+        </p>
         <div class="tabArea">
           <div
             :class="[activeTab==='LogIn'? 'active':'']"
             @click="activeTab = 'LogIn'"
           >
-            LOGIN
+            LogIn
           </div>
           <div
-            :class="[activeTab==='SignIn'? 'active':'']"
-            @click="activeTab = 'SignIn'"
+            :class="[activeTab==='SignUp'? 'active':'']"
+            @click="activeTab = 'SignUp'"
           >
-            SignIn
+            SignUp
           </div>
         </div>
         <section
-          v-if="activeTab ==='LogIn'"
           class="formArea"
         >
           <div
@@ -58,15 +57,8 @@
       </form>
 
       - OR - <br>
-      Sign in With
+      Sign up With
       <br><br>
-      <p>Don't have an account? <b>Sign up</b></p>
-    </div>
-    <div
-      v-if="errMsg"
-      style="color:red"
-    >
-      {{ errMsg }}
     </div>
   </div>
 </template>
@@ -76,50 +68,37 @@ import { ref, computed, watch } from 'vue'
 import { useStore } from 'vuex'
 import { useRouter } from 'vue-router'
 import socket from '@/utilities/socketConnection'
-import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword } from 'firebase/auth'
 
 const store = useStore()
 const userName = ref('sandy6513a@yahoo.com.tw')
 const userPassword = ref('rdtest1153')
-const errMsg = computed(() => store.state.appStore.errMsg)
 const router = useRouter()
-const onSubmit = () => {
-  console.log(userName.value)
-  const auth = getAuth()
-  signInWithEmailAndPassword(auth, userName.value, userPassword.value)
-    .then((userCredential) => {
-    // Signed in
-      const user = userCredential.user
-      console.log(user)
-    // ...
-    })
-    .catch((error) => {
-      const errorCode = error.code
-      const errorMessage = error.message
-    })
-  // store.commit('logIn', {
-  //   account: userName.value,
-  //   password: userPassword.value
-  // })
+const activeTab = ref('LogIn')
+
+const onSubmit = async () => {
+  activeTab.value === 'LogIn' ? logInDispatch() : signUpDispatch()
 }
-const logInStat = computed(() => store.state.appStore.isLogIn)
+async function logInDispatch () {
+  store.dispatch('logIn', {
+    userName: userName.value,
+    userPassword: userPassword.value
+  })
+}
+function signUpDispatch () {
+  store.dispatch('signup', {
+    userName: userName.value,
+    userPassword: userPassword.value
+  })
+}
+const logInStat = computed(() => store.state.appModule.isLogIn)
 socket.on('loginStat', (logInSuccess) => {
   store.commit('getLogInStat', logInSuccess)
 })
-watch(logInStat, () => {
-  if (logInStat.value) {
+watch(logInStat, (newValue) => {
+  if (newValue) {
     router.push('/chat')
   }
 })
-
-const activeTab = ref('LogIn')
-
-// const db = getFirestore()
-// const docSnap = await getDoc(doc(db, 'Message', 'zb5CCMoHqytaGSdVtS3B'))
-
-// if (docSnap.exists()) {
-//   console.log(docSnap.data())
-// }
 
 </script>
 
@@ -140,7 +119,10 @@ const activeTab = ref('LogIn')
     cursor: pointer;
     >.active{
       background-color: $bg-primary-blue;
-     color:white;
+      color:white;
+    }
+    >div{
+      padding: 2% 8%;
     }
 
   }
@@ -148,13 +130,14 @@ const activeTab = ref('LogIn')
     border-radius: 30px;
     width: 25%;
     @media screen and (max-width:1000px) {
-      width: 35%;
+      width: 50%;
     }
     max-width: 500px;
-    padding: 60px;
+    padding: 50px;
     background-color: rgb(242, 240, 240);
     .title{
       color: $bg-primary-blue;
+      font-weight: bold;
     }
     .subTitle{
       color: $dark-grey;
