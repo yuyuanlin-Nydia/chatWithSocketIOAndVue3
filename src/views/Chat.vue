@@ -84,6 +84,7 @@ export default defineComponent({
 <style lang="scss" scoped>
 .chat{
  height: 100%;
+ width: 100%;
  display: flex;
  justify-content: flex-start;
 

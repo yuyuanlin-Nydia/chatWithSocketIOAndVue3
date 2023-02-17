@@ -8,49 +8,20 @@
         <div>123456</div>
       </template>
     </CharacterBox>
-    <div class="msgBox">
-      <template v-if="currentUserData?.msg?.length>0">
-        <div
-          v-for="(eachMsg,index) in currentUserData.msg"
-          :key="index"
-          :class="['eachMsgBox',eachMsg.fromSelf?'myMsg':'notMyMsg']"
-        >
-          <img
-            src="https://picsum.photos/30/30"
-            alt=""
-            style="border-radius:50%"
-          >
-          <span>{{ eachMsg.content }}</span>
-        </div>
-      </template>
-      <template v-else>
-        <div :class="!currentChatDetailsLength? 'noMsgTxt':''">
-          <p> There is no messages yet!</p>
-        </div>
-      </template>
-    </div>
+    <ChatMsgBox />
     <TextInput />
   </div>
 </template>
 
-<script lang="ts">
+<script lang="ts" setup>
 import CharacterBox from '@/components/CharacterBox.vue'
 import TextInput from '@/components/form/TextInput.vue'
+import ChatMsgBox from '@/components/ChatMsgBox.vue'
 import { useStore } from 'vuex'
 import { computed } from 'vue'
-export default {
-  name: 'ChatDetail',
-  components: { CharacterBox, TextInput },
-  setup () {
-    const store = useStore()
-    const currentUserData = computed(() => store.getters.currentUserData)
-    const currentChatDetailsLength = computed(() => store.getters.currentChatDetailsLength)
-    return {
-      currentUserData,
-      currentChatDetailsLength
-    }
-  }
-}
+
+const store = useStore()
+const currentUserData = computed(() => store.getters.currentUserData)
 </script>
 
 <style lang="scss">
