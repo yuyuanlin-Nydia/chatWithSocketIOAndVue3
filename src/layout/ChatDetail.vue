@@ -21,7 +21,7 @@ import { useStore } from 'vuex'
 import { computed } from 'vue'
 
 const store = useStore()
-const currentUserData = computed(() => store.getters.currentUserData)
+const currentUserData = computed(() => store.getters['msgModule/currentUserData'])
 </script>
 
 <style lang="scss">

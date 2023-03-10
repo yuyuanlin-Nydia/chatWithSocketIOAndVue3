@@ -27,14 +27,25 @@
         />
       </li>
     </router-link>
+    <li
+      class="icon bar"
+      @click="logout"
+    >
+      <font-awesome-icon
+        icon="fa-solid fa-right-from-bracket"
+        inverse
+        size="lg"
+      />
+    </li>
   </ul>
 </template>
-<script lang="ts">
-import { defineComponent } from 'vue'
+<script lang="ts" setup>
+import { store } from '@/store'
 
-export default defineComponent({
-  name: 'MenuBar'
-})
+function logout () {
+  store.dispatch('appModule/logout')
+}
+
 </script>
 
 <style lang="scss">

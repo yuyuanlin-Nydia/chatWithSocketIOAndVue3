@@ -7,11 +7,12 @@ import './assets/scss/main.scss'
 import { library } from '@fortawesome/fontawesome-svg-core'
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 /* import specific icons */
-import { faBars, faGear, faPaperPlane } from '@fortawesome/free-solid-svg-icons'
+import { faBars, faGear, faPaperPlane, faRightFromBracket } from '@fortawesome/free-solid-svg-icons'
 import { faComment } from '@fortawesome/free-regular-svg-icons'
 import { initializeApp } from 'firebase/app'
 import { Quasar } from 'quasar'
 import quasarUserOptions from './quasar-user-options'
+import axiosInstance from './plugin/axios'
 
 const firebaseConfig = {
   apiKey: 'AIzaSyCZ5vQpxh5U2RAKeo2TK50mCe9trs7hN9A',
@@ -23,8 +24,11 @@ const firebaseConfig = {
 }
 initializeApp(firebaseConfig)
 
-library.add(faBars, faGear, faComment, faPaperPlane)
-createApp(App).use(Quasar, quasarUserOptions)
+library.add(faBars, faGear, faComment, faPaperPlane, faRightFromBracket)
+
+const app = createApp(App)
+app.provide('$axios', axiosInstance)
+app.use(Quasar, quasarUserOptions)
   .use(store)
   .use(router)
   .component('font-awesome-icon', FontAwesomeIcon)

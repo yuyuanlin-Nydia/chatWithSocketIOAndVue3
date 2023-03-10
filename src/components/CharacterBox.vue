@@ -1,8 +1,9 @@
 <template>
   <div
+    v-if="room"
     class="eachBox"
     :class="[isCurrentUser && !isTopPanel? 'borderLeft': '']"
-    @click="changeRoomHandler(room.userId)"
+    @click="changeRoomHandler(room)"
   >
     <div class="imgAndText">
       <div class="imgBox">
@@ -11,22 +12,22 @@
           alt=""
         >
         <span
-          v-if="room?.connected"
+          v-if="room.isOnline"
           class="onlineCircle"
         />
       </div>
       <div class="textMain">
         <div>
-          {{ room?.userName }} <br>
+          {{ room.userName }} <br>
         </div>
         <p
           class="newestText"
         >
           <!-- TODO:這邊上線給0或1要建enum；不是單純三元運算子=>改成computed -->
-          <!-- {{ isTopPanel? room.connected:room.msg[0]?.msg }} -->
-          <span v-if="isTopPanel">{{ room?.connected? 'ONLINE':'OFFLINE' }}</span>
-          <span v-else-if="!room?.msg?.length"> Now!You can send messages!!</span>
-          <span v-else>{{ room?.msg[room.msg.length-1].content }}</span>
+          <!-- {{ isTopPanel? room.isOnline:room.msg[0]?.msg }} -->
+          <span v-if="isTopPanel">{{ room?.isOnline? 'ONLINE':'OFFLINE' }}</span>
+          <span v-else-if="!room.msg?.length"> Now!You can send messages!!</span>
+          <span v-else>{{ room.msg[room.msg.length-1].content }}</span>
         </p>
       </div>
     </div>
@@ -45,27 +46,20 @@
   </div>
 </template>
 
-<script lang="ts">
-import { computed, defineComponent } from 'vue'
-
+<script lang="ts" setup>
+import { computed, defineProps } from 'vue'
 import { useStore } from 'vuex'
 
-export default defineComponent({
-  name: 'CharacterBox',
-  props: {
-    room: { type: Object, required: true },
-    isTopPanel: { type: Boolean, required: false, default: false }
-  },
-  setup (props) {
-    const store = useStore()
-    const isCurrentUser = computed(() => store.getters.isCurrentRoom(props.room?.userId))
-
-    return {
-      changeRoomHandler: (userId) => store.commit('changeUser', userId),
-      isCurrentUser
-    }
-  }
+const props = defineProps({
+  room: { type: Object, required: true, default: () => ({}) },
+  isTopPanel: { type: Boolean, required: false, default: false }
 })
+
+const store = useStore()
+const isCurrentUser = computed(() => store.getters['msgModule/isCurrentRoom'](props.room._id))
+function changeRoomHandler (userData) {
+  store.commit('msgModule/setCurrentUser', userData)
+}
 
 </script>
 

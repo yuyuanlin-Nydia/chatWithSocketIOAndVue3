@@ -1,18 +1,16 @@
 import { createRouter, createWebHistory, RouteRecordRaw } from 'vue-router'
-import Chat from '../views/Chat.vue'
-import LogIn from '../views/LogIn.vue'
-import MainLayout from '../layout/MainLayout.vue'
-import store from '../store/index'
-
+import { getToken } from '../util/localStorage'
+import { store } from '@/store'
 const routes: Array<RouteRecordRaw> = [
   {
     path: '/login',
-    name: 'LogIn',
+    name: 'Login',
     component: () => import(/* webpackChunkName: "Login" */ '../views/LogIn.vue')
   },
   {
     path: '',
     component: () => import(/* webpackChunkName: "MainLayout" */ '../layout/MainLayout.vue'),
+    redirect: '/chat',
     children: [
       {
         path: '/chat',
@@ -33,12 +31,10 @@ const router = createRouter({
   routes
 })
 
-router.beforeEach(async (to, from, next) => {
-  const logInStat = store.state.appModule.isLogIn
-  if (!logInStat && to.name !== 'LogIn') {
-    return next({ name: 'LogIn' })
+router.beforeEach((to) => {
+  if (!getToken() && to.name !== 'Login') {
+    store.dispatch('appModule/checkAuth')
   }
-  next()
 })
 
 export default router

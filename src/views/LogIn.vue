@@ -10,8 +10,8 @@
         </p>
         <div class="tabArea">
           <div
-            :class="[activeTab==='LogIn'? 'active':'']"
-            @click="activeTab = 'LogIn'"
+            :class="[activeTab==='Login'? 'active':'']"
+            @click="activeTab = 'Login'"
           >
             LogIn
           </div>
@@ -70,33 +70,36 @@ import { useRouter } from 'vue-router'
 import socket from '@/utilities/socketConnection'
 
 const store = useStore()
+const router = useRouter()
 const userName = ref('sandy6513a@yahoo.com.tw')
 const userPassword = ref('rdtest1153')
-const router = useRouter()
-const activeTab = ref('LogIn')
+const activeTab = ref('Login')
+const loginStat = computed(() => store.state.appModule.isLogIn)
 
 const onSubmit = async () => {
-  activeTab.value === 'LogIn' ? logInDispatch() : signUpDispatch()
+  activeTab.value === 'Login' ? loginDispatch() : signupDispatch()
 }
-async function logInDispatch () {
-  store.dispatch('logIn', {
+async function loginDispatch () {
+  await store.dispatch('appModule/login', {
+    userName: userName.value,
+    userPassword: userPassword.value
+  })
+
+  socket.emit('logInFromClient', store.state.appModule.userData)
+}
+
+function signupDispatch () {
+  store.dispatch('appModule/signUp', {
     userName: userName.value,
     userPassword: userPassword.value
   })
 }
-function signUpDispatch () {
-  store.dispatch('signUp', {
-    userName: userName.value,
-    userPassword: userPassword.value
-  })
-}
-const logInStat = computed(() => store.state.appModule.isLogIn)
-socket.on('loginStat', (logInSuccess) => {
-  store.commit('getLogInStat', logInSuccess)
+socket.on('loginStat', (loginSuccess) => {
+  store.commit('getLogInStat', loginSuccess)
 })
-watch(logInStat, (newValue) => {
+watch(loginStat, (newValue) => {
   if (newValue) {
-    router.push('/chat')
+    router.push({ name: 'Chat' })
   }
 })
 

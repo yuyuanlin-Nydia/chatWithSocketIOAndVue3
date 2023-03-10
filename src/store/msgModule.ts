@@ -3,10 +3,11 @@ import socket from '@/utilities/socketConnection'
 import { Module } from 'vuex'
 
 const msgModule: Module<any, any> = {
+  namespaced: true,
   state: {
     // 目前聊天視窗都是1對1 =>之後可能增加群組聊天 =>建立roomID 和 userId
     // 假設自己的USERID 898989
-    currentUserId: '56002',
+    currentUserData: null,
     allRooms: [
       //  TODO:timeReceived要改成秒數 並由近到遠排序
       //  TODO:msg比較長 會有...結尾
@@ -49,46 +50,39 @@ const msgModule: Module<any, any> = {
     ]
   },
   getters: {
-    isCurrentRoom: (state) => (id) => {
-      return state.currentUserId === id
+    isCurrentRoom: (state) => (_id) => {
+      return state.currentUserData?._id === _id
     },
     currentUserData: (state) => {
-      return state.allRooms.filter(item => item.userId === state.currentUserId)[0]
+      return state.allRooms.filter(item => item._id === state.currentUserData?._id)[0]
     },
     // currentChatDetails: (state, getters) => {
     //   return getters.currentRoomData.msg
     // },
     // 訊息數量
     currentChatDetailsLength: (state, getters) => {
-      console.log(getters.currentUserData?.msg)
-      return getters.currentUserData?.msg.length > 0
+      // return getters.currentUserData?.msg.length > 0
+      return true
     }
   },
   mutations: {
-    getAllRooms (state, payload):void {
+    setRooms (state, payload):void {
       state.allRooms = payload
-      state.allRooms.forEach((user) => {
-        user.self = user.userId === socket.id
-        if (user.self) {
-          user.connected = true
-        }
-      })
     },
-    pushRooms (state, payload):void {
-      for (let i = 0; i < state.allRooms.length; i++) {
-        const existingUser = state.allRooms[i]
-        if (existingUser.userId === payload.userId) {
-          existingUser.connected = true
-          return
-        }
-      }
+    newUserConnect (state, payload): void {
       payload.hasNewMessages = false
-      state.allRooms.push(payload)
+      const userExist = state.allRooms.find(item => item.email === payload.email)
+      if (!userExist) {
+        state.allRooms.push(payload)
+      } else {
+        state.allRooms.forEach(item => {
+          if (item.email === payload.email) {
+            item.isOnline = 1
+          }
+        })
+      }
     },
-    changeUser (state, payload):void {
-      state.currentUserId = payload
-    },
-    addMessage (state, payload):void {
+    addMessage (state, payload): void {
       socket.emit('privateMessage', {
         content: payload,
         to: state.currentUserId
@@ -96,13 +90,15 @@ const msgModule: Module<any, any> = {
       const idx = state.allRooms.findIndex(item => item.userId === state.currentUserId)
       state.allRooms[idx].msg.push({ content: payload, fromSelf: true })
     },
-    changeOnline (state, payload) {
-      console.log(payload)
+    setUserIsOnline (state, payload) {
       state.allRooms.forEach((user) => {
-        if (user.userId === payload) {
-          user.connected = false
+        if (user.userName === payload.userName) {
+          user.isOnline = false
         }
       })
+    },
+    setCurrentUser (state, payload) {
+      state.currentUserData = payload
     }
   },
   actions: {

@@ -27,6 +27,6 @@ import { computed } from 'vue'
 import { useStore } from 'vuex'
 
 const store = useStore()
-const currentUserData = computed(() => store.getters.currentUserData)
-const currentChatDetailsLength = computed(() => store.getters.currentChatDetailsLength)
+const currentUserData = computed(() => store.getters['msgModule/currentUserData'])
+const currentChatDetailsLength = computed(() => store.getters['msgModule/currentChatDetailsLength'])
 </script>
