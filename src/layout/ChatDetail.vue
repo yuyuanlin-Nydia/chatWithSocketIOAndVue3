@@ -1,14 +1,18 @@
 <template>
   <div class="chatDetail">
-    <CharacterBox
-      :room="currentUserData"
-      :is-top-panel="true"
-    >
-      <template #rightCon>
-        <div>123456</div>
-      </template>
-    </CharacterBox>
-    <ChatMsgBox />
+    <div class="topPanel">
+      <CharacterBox
+        :room="currentUserData"
+        :is-top-panel="true"
+      >
+        <template #rightCon>
+          <div>123456</div>
+        </template>
+      </CharacterBox>
+    </div>
+    <div class="msgBox2">
+      <ChatMsgBox />
+    </div>
     <TextInput />
   </div>
 </template>
@@ -26,14 +30,18 @@ const currentUserData = computed(() => store.getters['msgModule/currentUserData'
 
 <style lang="scss">
 .chatDetail{
-  flex:0 70%;
-  position: relative;
-  .msgBox{
-    height: 73vh;
+  display: flex;
+  flex-direction: column;
+  padding:0 10px;
+  width: 100%;
+  .topPanel{
+    height: 100px;
+  }
+  .msgBox2{
+    margin-top:15px ;
+    height: calc(100% - 180px);
     overflow-y: auto ;
     background-color: $bg-lightGrey;
-    padding: 0.8rem;
-
   }
   .eachMsgBox{
     display: flex;
@@ -48,6 +56,7 @@ const currentUserData = computed(() => store.getters['msgModule/currentUserData'
       align-self: flex-end;
     }
   }
+
 }
 .noMsgTxt{
   height: 100%;

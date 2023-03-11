@@ -41,15 +41,13 @@ export default defineComponent({
 
 <style lang="scss" scoped>
 .searchInput{
- position: absolute;
- bottom: 0;
- width: 100%;
  border-top: 1px solid lightgray;
  padding: 2% 0;
  display: flex;
- justify-content: space-around;
+ align-items: center;
+ justify-content: space-between;
  input{
-    width: 90%;
+    width: 93%;
  }
  .submitBtn{
     background-color: orange;
