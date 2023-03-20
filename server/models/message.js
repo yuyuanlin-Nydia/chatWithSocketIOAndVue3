@@ -1,25 +1,23 @@
 import { Schema, model } from 'mongoose'
+import { ObjectId } from 'mongodb'
+
 const msgSchema = new Schema({
-  content: {
-    type: String,
-    require: true
-  },
   from: {
-    type: String,
+    type: ObjectId,
     require: true
   },
   to: {
+    type: ObjectId,
+    require: true
+  },
+  msg: {
     type: String,
     require: true
   },
-  createdAt: {
+  sendAt: {
     type: Date,
     default: Date.now
-  },
-  readStatus: {
-    type: Number,
-    default: 0
   }
 })
 
-export default model('msg', msgSchema)
+export const Message = model('message', msgSchema)

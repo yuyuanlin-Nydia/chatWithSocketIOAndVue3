@@ -1,5 +1,5 @@
 import { createRouter, createWebHistory, RouteRecordRaw } from 'vue-router'
-import { getToken } from '../util/localStorage'
+import { getToken } from '@/utilities/localStorage'
 import { store } from '@/store'
 const routes: Array<RouteRecordRaw> = [
   {

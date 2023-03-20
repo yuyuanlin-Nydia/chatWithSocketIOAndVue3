@@ -1,12 +1,12 @@
 <template>
   <div class="chat">
     <ChatRoom />
-    <ChatDetail />
+    <ChatDetail ref="chatDetailRef" />
   </div>
 </template>
 
 <script lang="ts" setup>
-import { ref, computed, onMounted, inject } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import ChatRoom from '@/components/ChatRoom.vue'
 import ChatDetail from '@/layout/ChatDetail.vue'
 import socket from '@/utilities/socketConnection'
@@ -17,7 +17,7 @@ const store = useStore()
 const msgState = store.state.msgModule
 const currentUserId = computed(() => msgState.currentUserId)
 const allRooms = computed(() => msgState.allRooms)
-
+const chatDetailRef = ref()
 const testMsg = ref('')
 onMounted(() => {
   socket.connect()
@@ -25,19 +25,21 @@ onMounted(() => {
     console.log(socket.id)
   })
   socket.emit('chatPageEnter', 'test')
-  socket.on('allUsers', (users) => {
-    const newUserList = users.filter((user) => {
-      return user.userId !== socket.id
-    })
-    store.commit('msgModule/setRooms', newUserList)
-    store.commit('msgModule/setCurrentUser', newUserList[0])
+  socket.on('userWithNewestMsg', ({ userWithNewestMsg }) => {
+    console.log(userWithNewestMsg)
+    store.commit('msgModule/setRooms', userWithNewestMsg)
+    store.commit('msgModule/setCurrentUserData', userWithNewestMsg[0])
+  })
+  socket.on('currentUserMsg', (currentUserMsg) => {
+    store.commit('msgModule/setCurrentUserMsg', currentUserMsg)
+    chatDetailRef.value.scrollToBtm()
   })
   socket.on('newUserConnect', (newUser) => {
     $q.notify({
-      message: newUser.userName + '已進入聊天室',
+      message: newUser.userName + ' enters chat room!',
       type: 'positive'
     })
-    store.commit('newUserConnect', newUser)
+    store.commit('msgModule/newUserConnect', newUser)
   })
   socket.on('updateMembers', (msg) => {
     testMsg.value = `這個${msg}`
@@ -63,10 +65,10 @@ onMounted(() => {
   })
   socket.on('userDisconnect', (userData) => {
     $q.notify({
-      message: userData.userName + '已離開聊天室',
+      message: userData.userName + ' leaves chat room!',
       type: 'negative'
     })
-    store.commit('setUserIsOnline', userData)
+    store.commit('msgModule/setUserIsOnline', userData)
   })
 })
 

@@ -1,7 +1,7 @@
 import { Module } from 'vuex'
 import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword } from 'firebase/auth'
 import { useHttp } from '@/composable/useHttp'
-import { getToken, setToken, clearToken } from '@/util/localStorage'
+import { getToken, setToken, clearToken, setUserID, clearUserID } from '@/utilities/localStorage'
 import router from '@/router'
 import { Notify } from 'quasar'
 import AxiosInstance from '@/plugin/axios'
@@ -11,19 +11,21 @@ const appModule: Module<any, any> = {
   namespaced: true,
   state: {
     isLogin: false,
-    userAccount: ''
+    userData: ''
   },
   mutations: {
     setUserData (state, payload) {
       state.isLogin = true
       state.userData = payload.user
       setToken(payload.token)
-      router.push({ name: 'Chat' })
+      setUserID(payload.user._id)
       socket.connect()
+      router.push({ name: 'Chat' })
     },
     setLogOut (state): void{
       state.isLogin = false
       clearToken()
+      clearUserID()
       socket.disconnect()
 
       router.push({ name: 'Login' })
@@ -40,17 +42,12 @@ const appModule: Module<any, any> = {
     }
   },
   actions: {
-    async signUp ({ commit }, payload) {
-      const { userName, userPassword } = payload
-      const { postApi } = useHttp()
-      const auth = getAuth()
-      await postApi(createUserWithEmailAndPassword, auth, userName, userPassword)
+    async signup ({ commit }, payload) {
+      const result = await AxiosInstance.post('/signup', payload)
+      return result
     },
     async login ({ commit }, payload) {
-      const result = await AxiosInstance.post('/login', {
-        email: payload.userName,
-        password: payload.userPassword
-      })
+      const result = await AxiosInstance.post('/login', payload)
       commit('setUserData', result.data)
     },
     async checkAuth ({ commit }) {

@@ -21,34 +21,36 @@
           {{ room.userName }} <br>
         </div>
         <p
-          class="newestText"
+          class="latestMsg"
         >
           <!-- TODO:這邊上線給0或1要建enum；不是單純三元運算子=>改成computed -->
           <!-- {{ isTopPanel? room.isOnline:room.msg[0]?.msg }} -->
-          <span v-if="isTopPanel">{{ room?.isOnline? 'ONLINE':'OFFLINE' }}</span>
-          <span v-else-if="!room.msg?.length"> Now!You can send messages!!</span>
-          <span v-else>{{ room.msg[room.msg.length-1].content }}</span>
+          <span v-if="isTopPanel">{{ room.isOnline? 'ONLINE':'OFFLINE' }}</span>
+          <span v-else-if="room.latestMsgArr.length"> {{ room.latestMsgArr[0].latest }}</span>
+          <span v-else>Now!You can send messages!!</span>
         </p>
       </div>
     </div>
     <!-- TODO:改成slot -->
     <slot name="rightCon">
       <div class="timeAndMsgNo">
-        <div class="text-secondary-grey">
-          10min
+        <div class="text-secondary-grey text-right">
+          {{ dayjsTz(room.sendAt).fromNow().replace("ago","") }}
         </div>
         <span
-          v-show="room?.hasNewMessages"
+          v-show="room.hasNewMessages"
           class="MsgNo"
-        >{{ room?.hasNewMessages }}</span>
+        >{{ room.hasNewMessages }}</span>
       </div>
     </slot>
   </div>
 </template>
 
 <script lang="ts" setup>
+import socket from '@/utilities/socketConnection'
 import { computed, defineProps } from 'vue'
 import { useStore } from 'vuex'
+import { dayjsTz } from '@/utilities/helper'
 
 const props = defineProps({
   room: { type: Object, required: true, default: () => ({}) },
@@ -58,7 +60,9 @@ const props = defineProps({
 const store = useStore()
 const isCurrentUser = computed(() => store.getters['msgModule/isCurrentRoom'](props.room._id))
 function changeRoomHandler (userData) {
-  store.commit('msgModule/setCurrentUser', userData)
+  console.log(userData)
+  store.commit('msgModule/setCurrentUserData', userData)
+  socket.emit('changeRoom', userData)
 }
 
 </script>
@@ -94,16 +98,20 @@ function changeRoomHandler (userData) {
         border-radius: 50%;
       }
     }
-    .newestText{
+    .latestMsg{
      display: -webkit-box;
-     -webkit-line-clamp: 2;
+     -webkit-line-clamp: 1;
      -webkit-box-orient: vertical;
      overflow: hidden;
      color:$text-secondary-grey;
+     margin: 0;
     }
 
     .textMain{
        flex: 0 65%;
+       display: flex;
+       flex-direction: column;
+       justify-content: space-between;
     }
 
   }

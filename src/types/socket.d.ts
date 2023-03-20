@@ -3,9 +3,9 @@ type SocketUserData = {
   userName: string;
 }
 type SocketPrivateMessageData = {
-  content: string;
-  to?: string;
-  from?: string;
+  msg: string;
+  to: string;
+  from: string;
 }
 
 interface ServerToClientEvents {
@@ -13,19 +13,21 @@ interface ServerToClientEvents {
   basicEmit: (a: number, b: string, c: Buffer) => void;
   withAck: (d: string, callback: (e: number) => void) => void;
   newUserConnect: (value:SocketUserData)=>void
-  privateMessage:(b:SocketPrivateMessageData)=>void;
-  newMsgToClient:(b:any)=>void;
-  allUsers:(b:any)=>void;
-  updateMembers:(b:any)=>void;
-  userDisconnect:(value:any)=>void
-  loginStat:(value:number)=>void
+  privateMessage:(b: SocketPrivateMessageData)=>void;
+  newMsgToClient:(b: any)=>void;
+  userWithNewestMsg:(b: any)=>void;
+  updateMembers:(b: any)=>void;
+  userDisconnect:(value: any)=>void
+  loginStat:(value: number)=>void,
+  currentUserMsg:(msg: IMessage[])=>void
 }
 
 interface ClientToServerEvents {
   joinRoom: (msg: any) => void;
-  privateMessage:(b:SocketPrivateMessageData)=>void;
+  privateMessage:(b: SocketPrivateMessageData)=>void;
   chatPageEnter:(msg: any)=>void
-  logInFromClient:(msg:Record<string, string>)=>void
+  logInFromClient:(msg: Record<string, string>)=>void,
+  changeRoom:(msg: any)=> void
 }
 
 interface InterServerEvents {

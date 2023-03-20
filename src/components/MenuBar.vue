@@ -54,7 +54,7 @@ function logout () {
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 2.5%;
+  padding: 20px;
   margin: 0;
   list-style: none;
   li{

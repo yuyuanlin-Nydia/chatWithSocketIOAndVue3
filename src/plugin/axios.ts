@@ -1,4 +1,4 @@
-import { getToken } from '@/util/localStorage'
+import { getToken } from '@/utilities/localStorage'
 import axios from 'axios'
 
 declare module 'vue' {

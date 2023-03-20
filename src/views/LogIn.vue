@@ -11,15 +11,15 @@
         <div class="tabArea">
           <div
             :class="[activeTab==='Login'? 'active':'']"
-            @click="activeTab = 'Login'"
+            @click="setTab('Login')"
           >
-            LogIn
+            Login
           </div>
           <div
-            :class="[activeTab==='SignUp'? 'active':'']"
-            @click="activeTab = 'SignUp'"
+            :class="[activeTab==='Signup'? 'active':'']"
+            @click="setTab('Signup')"
           >
-            SignUp
+            Signup
           </div>
         </div>
         <section
@@ -28,23 +28,23 @@
           <div
             class="formItem"
           >
-            <label>Account :</label>
+            <label for="email">Email :</label>
             <input
-              id="useName"
-              v-model="userName"
-              type="text"
-              name=""
-              placeholder="Your account"
+              id="email"
+              v-model="email"
+              type="email"
+              placeholder="Please enter your email."
+              @keyup.a="setInputValueA"
+              @keyup.b="setInputValueB"
             >
           </div>
           <div class="formItem">
-            <label>Password :</label>
+            <label for="password">Password :</label>
             <input
-              id="userPassword"
-              v-model="userPassword"
-              type="text"
-              name=""
-              placeholder="Your password"
+              id="password"
+              v-model="password"
+              type="password"
+              placeholder="Please enter your password."
             >
           </div>
         </section>
@@ -55,10 +55,7 @@
           {{ activeTab }}
         </button>
       </form>
-
-      - OR - <br>
-      Sign up With
-      <br><br>
+      <br>
     </div>
   </div>
 </template>
@@ -68,31 +65,60 @@ import { ref, computed, watch } from 'vue'
 import { useStore } from 'vuex'
 import { useRouter } from 'vue-router'
 import socket from '@/utilities/socketConnection'
+import { useQuasar } from 'quasar'
 
+const $q = useQuasar()
 const store = useStore()
 const router = useRouter()
-const userName = ref('sandy6513a@yahoo.com.tw')
-const userPassword = ref('rdtest1153')
+const email = ref<string>('')
+const password = ref<string>('')
 const activeTab = ref('Login')
 const loginStat = computed(() => store.state.appModule.isLogIn)
 
 const onSubmit = async () => {
-  activeTab.value === 'Login' ? loginDispatch() : signupDispatch()
+  activeTab.value === 'Login' ? onLogin() : onSignup()
 }
-async function loginDispatch () {
+
+function setInputValueA () {
+  email.value = 'sandy6513a@yahoo.com.tw'
+  password.value = 'rdtest1153'
+}
+
+function setInputValueB () {
+  email.value = 'test1234@yahoo.com.tw'
+  password.value = 'test1234'
+}
+
+async function onLogin () {
   await store.dispatch('appModule/login', {
-    userName: userName.value,
-    userPassword: userPassword.value
+    email: email.value,
+    password: password.value
   })
 
   socket.emit('logInFromClient', store.state.appModule.userData)
 }
 
-function signupDispatch () {
-  store.dispatch('appModule/signUp', {
-    userName: userName.value,
-    userPassword: userPassword.value
+async function onSignup () {
+  const result = await store.dispatch('appModule/signup', {
+    email: email.value,
+    password: password.value,
+    userName: email.value.split('@')[0]
   })
+  if (!result.data) return
+  $q.notify({
+    message: 'Signup successfully! Please login!',
+    type: 'positive'
+  })
+
+  clearInput()
+}
+function clearInput () {
+  email.value = ''
+  password.value = ''
+}
+
+function setTab (tabName:string) {
+  activeTab.value = tabName
 }
 socket.on('loginStat', (loginSuccess) => {
   store.commit('getLogInStat', loginSuccess)
