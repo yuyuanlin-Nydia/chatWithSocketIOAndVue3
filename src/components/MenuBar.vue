@@ -8,6 +8,13 @@
       />
     </li>
     <router-link to="/chat">
+      <q-tooltip
+        anchor="bottom end"
+        self="bottom left"
+        class="bg-amber text-black shadow-4"
+      >
+        Chat
+      </q-tooltip>
       <li class="icon">
         <font-awesome-icon
           icon="fa-regular fa-comment"
@@ -18,6 +25,13 @@
       </li>
     </router-link>
     <router-link to="/setting">
+      <q-tooltip
+        anchor="bottom end"
+        self="bottom left"
+        class="bg-amber text-black shadow-4"
+      >
+        Setting
+      </q-tooltip>
       <li class="icon">
         <font-awesome-icon
           icon="fa-solid fa-gear"
@@ -31,6 +45,13 @@
       class="icon bar"
       @click="logout"
     >
+      <q-tooltip
+        anchor="bottom end"
+        self="bottom left"
+        class="bg-amber text-black shadow-4"
+      >
+        Logout
+      </q-tooltip>
       <font-awesome-icon
         icon="fa-solid fa-right-from-bracket"
         inverse
