@@ -6,11 +6,12 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed } from 'vue'
 import ChatRoom from '@/components/ChatRoom.vue'
 import ChatDetail from '@/layout/ChatDetail.vue'
 import socket from '@/utilities/socketConnection'
 import { useStore } from 'vuex'
+import { getToken } from '@/utilities/localStorage'
 import { useQuasar } from 'quasar'
 const $q = useQuasar()
 const store = useStore()
@@ -19,20 +20,25 @@ const currentUserId = computed(() => msgState.currentUserId)
 const allRooms = computed(() => msgState.allRooms)
 const chatDetailRef = ref()
 const testMsg = ref('')
-onMounted(() => {
-  socket.connect()
-  socket.on('connect', () => {
-    console.log(socket.id)
-  })
-  socket.emit('chatPageEnter', 'test')
+socket.connect()
+socket.on('connect', () => {
+  const token = getToken()
+  if (token) {
+    socket.emit('authenticate', { token }, (response) => {
+      if (!response.success) {
+        store.dispatch('appModule/logout')
+      }
+    })
+  }
   socket.on('userWithNewestMsg', ({ userWithNewestMsg }) => {
-    console.log(userWithNewestMsg)
     store.commit('msgModule/setRooms', userWithNewestMsg)
     store.commit('msgModule/setCurrentUserData', userWithNewestMsg[0])
   })
   socket.on('currentUserMsg', (currentUserMsg) => {
     store.commit('msgModule/setCurrentUserMsg', currentUserMsg)
-    chatDetailRef.value.scrollToBtm()
+    if (chatDetailRef.value) {
+      chatDetailRef.value.scrollToBtm()
+    }
   })
   socket.on('newUserConnect', (newUser) => {
     $q.notify({
@@ -70,6 +76,15 @@ onMounted(() => {
     })
     store.commit('msgModule/setUserIsOnline', userData)
   })
+})
+
+socket.on('connect_error', (err) => {
+  if (err.message === 'token error') {
+    socket.auth = {
+      token: getToken()
+    }
+    socket.connect()
+  }
 })
 
 </script>

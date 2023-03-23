@@ -34,6 +34,7 @@
               v-model="email"
               type="email"
               placeholder="Please enter your email."
+              autoComplete="true"
               @keyup.a="setInputValueA"
               @keyup.b="setInputValueB"
             >
@@ -45,6 +46,7 @@
               v-model="password"
               type="password"
               placeholder="Please enter your password."
+              autoComplete="true"
             >
           </div>
         </section>
@@ -94,27 +96,14 @@ async function onLogin () {
     email: email.value,
     password: password.value
   })
-
-  socket.emit('logInFromClient', store.state.appModule.userData)
 }
 
 async function onSignup () {
-  const result = await store.dispatch('appModule/signup', {
+  await store.dispatch('appModule/signup', {
     email: email.value,
     password: password.value,
     userName: email.value.split('@')[0]
   })
-  if (!result.data) return
-  $q.notify({
-    message: 'Signup successfully! Please login!',
-    type: 'positive'
-  })
-
-  clearInput()
-}
-function clearInput () {
-  email.value = ''
-  password.value = ''
 }
 
 function setTab (tabName:string) {

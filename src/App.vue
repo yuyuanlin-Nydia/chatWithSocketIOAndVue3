@@ -6,17 +6,6 @@
   </div>
 </template>
 
-<script lang="ts" setup>
-import socket from '@/utilities/socketConnection'
-
-socket.on('connect_error', (err) => {
-  console.log(err.message)
-  setTimeout(() => {
-    socket.connect()
-  }, 1000)
-})
-</script>
-
 <style lang="scss">
 body{
   padding: 0;

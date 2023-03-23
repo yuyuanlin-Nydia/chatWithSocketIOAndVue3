@@ -2,6 +2,7 @@
   <div class="chatDetail">
     <div class="topPanel">
       <CharacterBox
+        v-if="currentUserData"
         :room="currentUserData"
         :is-top-panel="true"
       >
@@ -41,7 +42,7 @@
           >
           <div class="dataDisplay">
             <span>
-              {{ dayjsTz(aMsg.sendAt).format('YYYY-MM-DD hh:mm') }}
+              {{ dayjsTz(aMsg.sendAt).format('YYYY-MM-DD HH:mm') }}
             </span>
             <span class="msgText">
               {{ aMsg.msg }}

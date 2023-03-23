@@ -21,13 +21,14 @@ interface ServerToClientEvents {
   loginStat:(value: number)=>void,
   currentUserMsg:(msg: IMessage[])=>void
 }
-
+interface IAuthenticateCb {
+  (message: {success: boolean}): void;
+}
 interface ClientToServerEvents {
   joinRoom: (msg: any) => void;
   privateMessage:(b: SocketPrivateMessageData)=>void;
-  chatPageEnter:(msg: any)=>void
-  logInFromClient:(msg: Record<string, string>)=>void,
-  changeRoom:(msg: any)=> void
+  changeRoom:(msg: any)=> void,
+  authenticate:(req: {token: string}, callback: IAuthenticateCb)=> void,
 }
 
 interface InterServerEvents {

@@ -24,7 +24,6 @@
           class="latestMsg"
         >
           <!-- TODO:這邊上線給0或1要建enum；不是單純三元運算子=>改成computed -->
-          <!-- {{ isTopPanel? room.isOnline:room.msg[0]?.msg }} -->
           <span v-if="isTopPanel">{{ room.isOnline? 'ONLINE':'OFFLINE' }}</span>
           <span v-else-if="room.latestMsgArr.length"> {{ room.latestMsgArr[0].latest }}</span>
           <span v-else>Now!You can send messages!!</span>
@@ -35,7 +34,7 @@
     <slot name="rightCon">
       <div class="timeAndMsgNo">
         <div class="text-secondary-grey text-right">
-          {{ dayjsTz(room.sendAt).fromNow().replace("ago","") }}
+          {{ dayjsTz(room.latestMsgArr[0].sendAt).fromNow().replace("ago","") }}
         </div>
         <span
           v-show="room.hasNewMessages"
@@ -60,7 +59,6 @@ const props = defineProps({
 const store = useStore()
 const isCurrentUser = computed(() => store.getters['msgModule/isCurrentRoom'](props.room._id))
 function changeRoomHandler (userData) {
-  console.log(userData)
   store.commit('msgModule/setCurrentUserData', userData)
   socket.emit('changeRoom', userData)
 }

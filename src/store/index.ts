@@ -8,5 +8,3 @@ export const store = createStore({
     msgModule
   }
 })
-
-export default store

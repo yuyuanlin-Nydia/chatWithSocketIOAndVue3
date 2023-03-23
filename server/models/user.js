@@ -17,7 +17,7 @@ const userSchema = new Schema({
   },
   isOnline: {
     type: Number,
-    default: true
+    default: 0
   },
   registerDate: {
     type: Date,
@@ -58,7 +58,7 @@ userSchema.statics.findByCredentials = async (email, password) => {
   // 根據 email 至資料庫找尋該用戶資料
   const user = await User.findOne({ email })
   // 沒找到該用戶時，丟出錯誤訊息
-  if (!user) { throw new Error('Unable to login') }
+  if (!user) { throw new Error('User not found!') }
   // 透過 bcrypt 驗證密碼
   const isMatch = await bcrypt.compare(password, user.password)
   // 驗證失敗時，丟出錯誤訊息
@@ -68,4 +68,5 @@ userSchema.statics.findByCredentials = async (email, password) => {
 }
 
 const User = model('users', userSchema)
+User.createIndexes()
 export default User

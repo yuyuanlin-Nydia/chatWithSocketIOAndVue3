@@ -1,6 +1,4 @@
 import { Module } from 'vuex'
-import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword } from 'firebase/auth'
-import { useHttp } from '@/composable/useHttp'
 import { getToken, setToken, clearToken, setUserID, clearUserID } from '@/utilities/localStorage'
 import router from '@/router'
 import { Notify } from 'quasar'
@@ -19,7 +17,6 @@ const appModule: Module<any, any> = {
       state.userData = payload.user
       setToken(payload.token)
       setUserID(payload.user._id)
-      socket.connect()
       router.push({ name: 'Chat' })
     },
     setLogOut (state): void{
@@ -27,7 +24,6 @@ const appModule: Module<any, any> = {
       clearToken()
       clearUserID()
       socket.disconnect()
-
       router.push({ name: 'Login' })
       Notify.create({
         message: '您已登出',
@@ -44,11 +40,25 @@ const appModule: Module<any, any> = {
   actions: {
     async signup ({ commit }, payload) {
       const result = await AxiosInstance.post('/signup', payload)
-      return result
+      if (result.data.success) {
+        commit('setUserData', result.data)
+      } else {
+        Notify.create({
+          message: result.data.errMsg,
+          type: 'negative'
+        })
+      }
     },
     async login ({ commit }, payload) {
       const result = await AxiosInstance.post('/login', payload)
-      commit('setUserData', result.data)
+      if (result.data.success) {
+        commit('setUserData', result.data)
+      } else {
+        Notify.create({
+          message: result.data.errMsg,
+          type: 'negative'
+        })
+      }
     },
     async checkAuth ({ commit }) {
       const result = await AxiosInstance.post('/auth')

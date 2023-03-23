@@ -44,7 +44,6 @@ const msgModule: Module<any, any> = {
     },
     setCurrentUserMsg (state, payload: IMessage[]) {
       state.currentUserMsg = payload
-      console.log(state.currentUserMsg)
     },
     addCurrentUserMsg (state, payload): void {
       state.currentUserMsg.push(payload)

@@ -44,9 +44,19 @@ app.post('/signup', async (req, res) => {
     const token = await user.generateAuthToken()
 
     // 回傳該用戶資訊及 JWT
-    res.status(201).send({ user, token })
+    res.status(200).send({
+      success: 1,
+      user,
+      token
+    })
   } catch (err) {
-    res.status(400).send(err)
+    if (err.code === 11000) {
+      res.status(200).send({
+        success: 0,
+        errCode: err.code,
+        errMsg: 'Email already exists! Please change.'
+      })
+    }
   }
 })
 
@@ -59,9 +69,20 @@ app.post('/login', async (req, res) => {
     )
     const token = await user.generateAuthToken()
     // 回傳該用戶資訊及 JWT
-    res.send({ user, token })
+    res.status(200).send({
+      success: 1,
+      user,
+      token
+    })
   } catch (err) {
-    res.status(400).send('404')
+    console.log(err)
+    res.status(200).send(
+      {
+        success: 0,
+        errCode: err.code,
+        errMsg: 'User not found!'
+      }
+    )
   }
 })
 
@@ -93,85 +114,89 @@ app.post('/addMsg', async (req, res) => {
     console.log(err)
   }
 })
-io.use(async (socket, next) => {
+io.use((socket, next) => {
   const token = socket.handshake.auth.token.replace('Bearer ', '')
-  socket.token = token
   if (token === 'null') next(new Error('token error'))
   next()
 })
 
-io.on('connection', async (socket) => {
+io.on('connection', (socket) => {
   console.log('connected')
-  console.log(socket.token)
-  socket.on('chatPageEnter', async (name) => {
-    const user = await User.findOne({ 'tokens.token': socket.token })
-    console.log(user)
-    if (!user) return
-    socket.userData = user
-    await User.findOneAndUpdate(
-      { email: socket.userData?.email },
-      { $set: { isOnline: 1 } }
-    )
-    const userWithNewestMsg = await User.aggregate([
-      {
-        $match: {
-          _id: {
-            $ne: socket.userData._id
+  socket.on('authenticate', async ({ token }, callback) => {
+    try {
+      socket.userData = await User.findOne({ tokens: { $elemMatch: { token } } })
+      socket.token = token
+      socket.userData = await User.findOneAndUpdate(
+        { email: socket.userData?.email },
+        { $set: { isOnline: 1 } }
+      )
+      if (!socket.userData) {
+        throw new Error('Token not found!')
+      }
+      callback({ success: true })
+      const userWithNewestMsg = await User.aggregate([
+        {
+          $match: {
+            _id: {
+              $ne: socket.userData?._id
+            }
           }
-        }
-      },
-      {
-        $lookup: {
-          from: 'messages',
-          let: {
-            userId: '$_id'
-          },
-          pipeline: [
-            {
-              $match: {
-                $expr: {
-                  $and: [
-                    { $in: ['$from', ['$$userId', socket.userData._id]] },
-                    { $in: ['$to', ['$$userId', socket.userData._id]] }
-                  ]
+        },
+        {
+          $lookup: {
+            from: 'messages',
+            let: {
+              userId: '$_id'
+            },
+            pipeline: [
+              {
+                $match: {
+                  $expr: {
+                    $and: [
+                      { $in: ['$from', ['$$userId', socket.userData._id]] },
+                      { $in: ['$to', ['$$userId', socket.userData._id]] }
+                    ]
+                  }
+                }
+              },
+              { $sort: { sendAt: -1 } },
+
+              { $limit: 1 },
+              {
+                $project: {
+                  _id: 0,
+                  from: '$from',
+                  to: '$to',
+                  latest: '$msg',
+                  sendAt: '$sendAt'
                 }
               }
-            },
-            { $sort: { sendAt: -1 } },
-
-            { $limit: 1 },
-            {
-              $project: {
-                _id: 0,
-                from: '$from',
-                to: '$to',
-                latest: '$msg',
-                sendAt: '$sendAt'
-              }
-            }
-          ],
-          as: 'latestMsgArr'
+            ],
+            as: 'latestMsgArr'
+          }
+        },
+        {
+          $project: {
+            password: 0,
+            tokens: 0,
+            registerDate: 0
+          }
+        },
+        {
+          $sort: { 'latestMsgArr.sendAt': -1 }
         }
-      },
-      {
-        $project: {
-          password: 0,
-          tokens: 0,
-          registerDate: 0
-        }
-      },
-      {
-        $sort: { 'latestMsgArr.sendAt': -1 }
-      }
-    ])
-    const currentUserMsg = await Message.find(
-      {
-        from: { $in: [socket.userData._id, userWithNewestMsg[0]._id] },
-        to: { $in: [socket.userData._id, userWithNewestMsg[0]._id] }
-      })
-    socket.emit('userWithNewestMsg', { userWithNewestMsg })
-    socket.emit('currentUserMsg', currentUserMsg)
-    socket.broadcast.emit('newUserConnect', socket.userData)
+      ])
+      const currentUserMsg = await Message.find(
+        {
+          from: { $in: [socket.userData._id, userWithNewestMsg[0]._id] },
+          to: { $in: [socket.userData._id, userWithNewestMsg[0]._id] }
+        })
+      socket.emit('userWithNewestMsg', { userWithNewestMsg })
+      socket.emit('currentUserMsg', currentUserMsg)
+      socket.broadcast.emit('newUserConnect', socket.userData)
+    } catch (err) {
+      console.log(err)
+    }
   })
   socket.on('changeRoom', async (userData) => {
     const currentUserMsg = await Message.find(
@@ -196,7 +221,6 @@ io.on('connection', async (socket) => {
   // })
 
   socket.on('disconnect', async () => {
-    console.log('disconnect')
     // update the connection status
     const result = await User.findOneAndUpdate(
       { email: socket.userData?.email },
@@ -204,8 +228,6 @@ io.on('connection', async (socket) => {
     ).catch(err =>
       console.error(`Failed to find and update document: ${err}`)
     )
-    console.log(result)
-    console.log(result)
     if (result) {
       socket.broadcast.emit('userDisconnect', result)
     }

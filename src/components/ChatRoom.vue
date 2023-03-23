@@ -11,7 +11,7 @@
     <div class="roomBox">
       <CharacterBox
         v-for="perRoom in allRooms"
-        :key="perRoom.userId"
+        :key="perRoom._id"
         :room="perRoom"
         :is-top-panel="false"
       />
