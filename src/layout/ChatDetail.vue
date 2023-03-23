@@ -78,9 +78,8 @@
 </template>
 
 <script lang="ts" setup>
-import '@fortawesome/fontawesome-free/css/all.css'
 import CharacterBox from '@/components/CharacterBox.vue'
-import { computed, ref, onMounted, nextTick, defineExpose } from 'vue'
+import { computed, ref, nextTick, defineExpose } from 'vue'
 import { dayjsTz } from '@/utilities/helper'
 
 import { useStore } from 'vuex'

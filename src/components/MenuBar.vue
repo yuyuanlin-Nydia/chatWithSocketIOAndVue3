@@ -1,13 +1,15 @@
 <template>
   <ul class="menuBar">
-    <li class="icon bar">
-      <font-awesome-icon
+    <li class="bar">
+      <q-btn
+        dense
+        flat
         icon="fa-solid fa-bars"
-        inverse
-        size="lg"
+        size="sm"
+        color="white"
       />
     </li>
-    <router-link to="/chat">
+    <li>
       <q-tooltip
         anchor="bottom end"
         self="bottom left"
@@ -15,16 +17,16 @@
       >
         Chat
       </q-tooltip>
-      <li class="icon">
-        <font-awesome-icon
-          icon="fa-regular fa-comment"
-          class=""
-          inverse
-          size="lg"
-        />
-      </li>
-    </router-link>
-    <router-link to="/setting">
+      <q-btn
+        to="/chat"
+        flat
+        icon="fa-regular fa-comment"
+        size="sm"
+        color="white"
+        dense
+      />
+    </li>
+    <li>
       <q-tooltip
         anchor="bottom end"
         self="bottom left"
@@ -32,19 +34,16 @@
       >
         Setting
       </q-tooltip>
-      <li class="icon">
-        <font-awesome-icon
-          icon="fa-solid fa-gear"
-          class=""
-          inverse
-          size="lg"
-        />
-      </li>
-    </router-link>
-    <li
-      class="icon bar"
-      @click="logout"
-    >
+      <q-btn
+        to="/setting"
+        dense
+        flat
+        icon="fa-solid fa-gear"
+        size="sm"
+        color="white"
+      />
+    </li>
+    <li>
       <q-tooltip
         anchor="bottom end"
         self="bottom left"
@@ -52,10 +51,13 @@
       >
         Logout
       </q-tooltip>
-      <font-awesome-icon
+      <q-btn
+        dense
+        flat
         icon="fa-solid fa-right-from-bracket"
-        inverse
-        size="lg"
+        size="sm"
+        color="white"
+        @click="logout"
       />
     </li>
   </ul>
