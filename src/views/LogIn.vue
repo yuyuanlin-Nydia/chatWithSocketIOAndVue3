@@ -33,6 +33,7 @@
               id="email"
               v-model="email"
               type="email"
+              class="input"
               placeholder="Please enter your email."
               autoComplete="true"
               @keyup.a="setInputValueA"
@@ -44,6 +45,7 @@
             <input
               id="password"
               v-model="password"
+              class="input"
               type="password"
               placeholder="Please enter your password."
               autoComplete="true"

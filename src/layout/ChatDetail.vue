@@ -57,9 +57,10 @@
       </template>
     </div>
     <!-- 下方輸入框 -->
-    <div class="searchInput">
+    <div class="msgInputBox">
       <input
         v-model="inputMsg"
+        class="input"
         type="text"
         placeholder="write your message..."
         @keyup.enter="msgSubmitHandler"
@@ -172,13 +173,12 @@ async function msgSubmitHandler () {
     flex-direction: row-reverse;
   }
 }
-.searchInput{
+.msgInputBox{
  border-top: 1px solid lightgray;
  padding: 2% 0;
  display: flex;
  align-items: center;
  justify-content: space-between;
-
  input{
     width: 93%;
  }

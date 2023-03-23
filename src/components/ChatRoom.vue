@@ -1,13 +1,21 @@
 <template>
   <div class="chatRoom">
-    <h3><b>CHAT</b></h3>
+    <h5><b>CHAT</b></h5>
     <!-- TODO:搜尋功能 -->
-    <input
-      id=""
-      type="text"
-      placeholder="search"
-      name=""
+    <q-input
+      v-model="filterText"
+      outlined
+      placeholder="Search"
+      dense
+      color="grey"
     >
+      <template #prepend>
+        <q-icon
+          name="fa-solid fa-magnifying-glass"
+          size="sm"
+        />
+      </template>
+    </q-input>
     <div class="roomBox">
       <CharacterBox
         v-for="perRoom in allRooms"
@@ -19,24 +27,15 @@
   </div>
 </template>
 
-<script lang="ts">
-import { defineComponent, computed } from 'vue'
+<script lang="ts" setup>
+import { computed, ref } from 'vue'
 import CharacterBox from '@/components/CharacterBox.vue'
 import { useStore } from 'vuex'
 
-export default defineComponent({
-  name: 'ChatRoom',
-  components: { CharacterBox },
-  setup () {
-    const store = useStore()
-    const allRooms = computed(function () {
-      return store.state.msgModule.allRooms
-    })
-    return {
-      // roomData,
-      allRooms
-    }
-  }
+const store = useStore()
+const filterText = ref<string>('')
+const allRooms = computed(function () {
+  return store.state.msgModule.allRooms
 })
 
 </script>
