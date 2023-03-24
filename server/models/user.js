@@ -58,15 +58,14 @@ userSchema.statics.findByCredentials = async (email, password) => {
   // 根據 email 至資料庫找尋該用戶資料
   const user = await User.findOne({ email })
   // 沒找到該用戶時，丟出錯誤訊息
-  if (!user) { throw new Error('User not found!') }
+  if (!user) { throw new Error('Email not found!') }
   // 透過 bcrypt 驗證密碼
   const isMatch = await bcrypt.compare(password, user.password)
   // 驗證失敗時，丟出錯誤訊息
-  if (!isMatch) { throw new Error('Unable to login') }
+  if (!isMatch) { throw new Error('Password is incorrect!') }
   // 驗證成功時，回傳該用戶完整資料
   return user
 }
 
-const User = model('users', userSchema)
+export const User = model('users', userSchema)
 User.createIndexes()
-export default User

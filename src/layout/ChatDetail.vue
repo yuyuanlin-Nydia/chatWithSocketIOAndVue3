@@ -104,7 +104,7 @@ function scrollToBtm () {
   })
 }
 async function msgSubmitHandler () {
-  await store.dispatch('msgModule/addMsg', {
+  await store.dispatch('msgModule/addMessage', {
     msg: inputMsg.value,
     to: currentUserData.value._id,
     from: getUserID() as string,

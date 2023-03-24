@@ -1,5 +1,5 @@
 import jwt from 'jsonwebtoken'
-import User from './models/user.js'
+import { User } from './models/user.js'
 export default async (req, res, next) => {
   try {
     // 從來自客戶端請求的 header 取得和擷取 JWT

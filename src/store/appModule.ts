@@ -1,8 +1,11 @@
 import { Module } from 'vuex'
-import { getToken, setToken, clearToken, setUserID, clearUserID } from '@/utilities/localStorage'
+import { setToken, clearToken, setUserID, clearUserID } from '@/utilities/localStorage'
 import router from '@/router'
 import { Notify } from 'quasar'
-import AxiosInstance from '@/plugin/axios'
+import { ApiUrl } from '@/enum/apiEnum'
+import { PageName } from '@/enum/pageNameEnum'
+
+import { postApi } from '@/plugin/axios'
 import socket from '@/utilities/socketConnection'
 
 const appModule: Module<any, any> = {
@@ -17,14 +20,14 @@ const appModule: Module<any, any> = {
       state.userData = payload.user
       setToken(payload.token)
       setUserID(payload.user._id)
-      router.push({ name: 'Chat' })
+      router.push({ name: PageName.Chat })
     },
     setLogOut (state): void{
       state.isLogin = false
       clearToken()
       clearUserID()
       socket.disconnect()
-      router.push({ name: 'Login' })
+      router.push({ name: PageName.Login })
       Notify.create({
         message: '您已登出',
         type: 'warning'
@@ -39,39 +42,28 @@ const appModule: Module<any, any> = {
   },
   actions: {
     async signup ({ commit }, payload) {
-      const result = await AxiosInstance.post('/signup', payload)
-      if (result.data.success) {
-        commit('setUserData', result.data)
-      } else {
-        Notify.create({
-          message: result.data.errMsg,
-          type: 'negative'
-        })
+      const result = await postApi(ApiUrl.UserSignup, payload)
+      if (result) {
+        commit('setUserData', result.message)
       }
     },
     async login ({ commit }, payload) {
-      const result = await AxiosInstance.post('/login', payload)
-      if (result.data.success) {
-        commit('setUserData', result.data)
-      } else {
-        Notify.create({
-          message: result.data.errMsg,
-          type: 'negative'
-        })
+      const result = await postApi(ApiUrl.UserLogin, payload)
+      if (result) {
+        commit('setUserData', result.message)
       }
     },
     async checkAuth ({ commit }) {
-      const result = await AxiosInstance.post('/auth')
-      commit('changeLoginSta', result.data)
-      if (!result.data) {
-        router.push({ name: 'Login' })
+      const result = await postApi(ApiUrl.UserAuth)
+      if (result) {
+        commit('changeLoginSta', result.message)
       }
     },
-    async logout ({ commit }) {
-      await AxiosInstance.post('/logout', {
-        user: { token: getToken() }
-      })
-      commit('setLogOut')
+    async logout ({ commit }, payload) {
+      const result = await postApi(ApiUrl.UserLogout, payload)
+      if (result) {
+        commit('setLogOut')
+      }
     }
   }
 }

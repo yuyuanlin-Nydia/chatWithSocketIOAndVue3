@@ -1,7 +1,6 @@
 <template>
   <div class="chatRoom">
     <h5><b>CHAT</b></h5>
-    <!-- TODO:搜尋功能 -->
     <q-input
       v-model="filterText"
       outlined

@@ -69,9 +69,8 @@ import { ref, computed, watch } from 'vue'
 import { useStore } from 'vuex'
 import { useRouter } from 'vue-router'
 import socket from '@/utilities/socketConnection'
-import { useQuasar } from 'quasar'
+import { PageName } from '@/enum/pageNameEnum'
 
-const $q = useQuasar()
 const store = useStore()
 const router = useRouter()
 const email = ref<string>('')
@@ -116,7 +115,7 @@ socket.on('loginStat', (loginSuccess) => {
 })
 watch(loginStat, (newValue) => {
   if (newValue) {
-    router.push({ name: 'Chat' })
+    router.push({ name: PageName.Chat })
   }
 })
 

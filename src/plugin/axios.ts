@@ -1,6 +1,9 @@
+import router from '@/router'
 import { getToken } from '@/utilities/localStorage'
-import axios from 'axios'
+import axios, { AxiosError, AxiosInstance } from 'axios'
 import { Notify } from 'quasar'
+import { ErrorCode } from '@/enum/apiEnum'
+import { PageName } from '@/enum/pageNameEnum'
 
 declare module 'vue' {
   interface ComponentCustomProperties {
@@ -8,7 +11,7 @@ declare module 'vue' {
   }
 }
 // 创建axios实例
-const instance = axios.create({
+const instance: AxiosInstance = axios.create({
   baseURL: 'http://localhost:3000'
 })
 instance.interceptors.request.use(
@@ -28,5 +31,23 @@ instance.interceptors.response.use(
     console.log(error)
   }
 )
-
+export function postApi (url: string, postData = {}): Promise<any> {
+  return instance.post(url, postData)
+    .then(res => {
+      const { success, error } = res.data
+      if (success) return res.data
+      throw new AxiosError(error || 'fail')
+    })
+    .catch((err) => {
+      console.log(err)
+      const { code, message } = err.message
+      if (code === ErrorCode.Unauthorized) {
+        router.push({ name: PageName.Login })
+      }
+      Notify.create({
+        message: code + ' - ' + message,
+        type: 'negative'
+      })
+    })
+}
 export default instance

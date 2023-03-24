@@ -1,4 +1,5 @@
-import AxiosInstance from '@/plugin/axios'
+import { postApi } from '@/plugin/axios'
+import { ApiUrl } from '@/enum/apiEnum'
 import { Module } from 'vuex'
 
 const msgModule: Module<any, any> = {
@@ -50,10 +51,11 @@ const msgModule: Module<any, any> = {
     }
   },
   actions: {
-    async addMsg ({ commit }, payload) {
-      const result = await AxiosInstance.post('/addMsg', payload)
-      if (!result.data) return
-      commit('addCurrentUserMsg', result.data)
+    async addMessage ({ commit }, payload) {
+      const result = await postApi(ApiUrl.MessageAddMessage, payload)
+      if (result) {
+        commit('addCurrentUserMsg', result.message.msgText)
+      }
     }
   },
   modules: {

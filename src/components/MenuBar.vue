@@ -64,9 +64,12 @@
 </template>
 <script lang="ts" setup>
 import { store } from '@/store'
+import { getToken } from '@/utilities/localStorage'
 
 function logout () {
-  store.dispatch('appModule/logout')
+  store.dispatch('appModule/logout', {
+    user: { token: getToken() }
+  })
 }
 
 </script>
