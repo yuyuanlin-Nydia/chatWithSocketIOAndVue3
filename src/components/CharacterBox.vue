@@ -34,7 +34,7 @@
     <slot name="rightCon">
       <div class="timeAndMsgNo">
         <div class="text-secondary-grey text-right">
-          {{ dayjsTz(room.latestMsgArr[0].sendAt).fromNow().replace("ago","") }}
+          {{ getLatestMsgFromNow(room.latestMsgArr[0]?.sendAt) }}
         </div>
         <span
           v-show="room.hasNewMessages"
@@ -62,7 +62,11 @@ function changeRoomHandler (userData) {
   store.commit('msgModule/setCurrentUserData', userData)
   socket.emit('changeRoom', userData)
 }
-
+function getLatestMsgFromNow (time: string) {
+  return time
+    ? dayjsTz(time).fromNow().replace('ago', '')
+    : null
+}
 </script>
 
 <style lang="scss" >
