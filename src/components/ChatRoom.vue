@@ -5,7 +5,7 @@
     <q-input
       v-model="filterText"
       outlined
-      placeholder="Search"
+      placeholder="Search user"
       dense
       color="grey"
     >
@@ -17,12 +17,22 @@
       </template>
     </q-input>
     <div class="roomBox">
-      <CharacterBox
-        v-for="perRoom in allRooms"
-        :key="perRoom._id"
-        :room="perRoom"
-        :is-top-panel="false"
-      />
+      <template v-if="roomsDisplay.length">
+        <CharacterBox
+          v-for="perRoom in roomsDisplay"
+          :key="perRoom._id"
+          :room="perRoom"
+          :is-top-panel="false"
+        />
+      </template>
+      <template v-else>
+        <div
+          class="flex items-center justify-center"
+          style="height: 100%;"
+        >
+          No matched user!
+        </div>
+      </template>
     </div>
   </div>
 </template>
@@ -34,17 +44,17 @@ import { useStore } from 'vuex'
 
 const store = useStore()
 const filterText = ref<string>('')
-const allRooms = computed(function () {
-  return store.state.msgModule.allRooms
+const roomsDisplay = computed(function () {
+  return store.state.msgModule.allRooms.filter(aRoom => aRoom.userName.includes(filterText.value))
 })
 
 </script>
 
 <style lang="scss">
 .chatRoom{
-  padding: 2%;
+  padding: 1.5%;
   flex: 0 30%;
-  height: 95vh;
+  height: 100%;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
@@ -52,7 +62,6 @@ const allRooms = computed(function () {
     overflow-y: auto;
     overflow-x: hidden;
     height: 90%;
-
   }
 }
 </style>
