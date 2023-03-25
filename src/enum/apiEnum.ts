@@ -3,9 +3,7 @@ export enum ApiUrl {
   UserLogin = '/user/login',
   UserSignup = '/user/signup',
   UserLogout = '/user/logout',
-  UserAuth = '/user/auth',
-  // message
-  MessageAddMessage = '/message/addMessage'
+  UserAuth = '/user/auth'
 }
 
 export enum ErrorCode {

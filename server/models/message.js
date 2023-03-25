@@ -2,6 +2,10 @@ import { Schema, model } from 'mongoose'
 import { ObjectId } from 'mongodb'
 
 const msgSchema = new Schema({
+  roomID: {
+    type: String,
+    require: true
+  },
   from: {
     type: ObjectId,
     require: true

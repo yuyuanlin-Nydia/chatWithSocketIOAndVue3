@@ -13,68 +13,50 @@ import socket from '@/utilities/socketConnection'
 import { useStore } from 'vuex'
 import { getToken } from '@/utilities/localStorage'
 import { useQuasar } from 'quasar'
+
 const $q = useQuasar()
 const store = useStore()
-const msgState = store.state.msgModule
-const currentUserId = computed(() => msgState.currentUserId)
-const allRooms = computed(() => msgState.allRooms)
 const chatDetailRef = ref()
-const testMsg = ref('')
 socket.connect()
 socket.on('connect', () => {
   const token = getToken()
   if (token) {
-    socket.emit('authenticate', { token }, (response) => {
+    socket.emit('authenticate', token, (response) => {
       if (!response.success) {
         store.dispatch('appModule/logout')
       }
     })
   }
-  socket.on('userWithNewestMsg', ({ userWithNewestMsg }) => {
-    store.commit('msgModule/setRooms', userWithNewestMsg)
-    store.commit('msgModule/setCurrentUserData', userWithNewestMsg[0])
+
+  socket.on('userWithNewestMsg', (userWithNewestMsg) => {
+    store.commit('roomModule/setRooms', userWithNewestMsg)
+    store.commit('roomModule/setCurrentRoomUser', userWithNewestMsg[0])
   })
-  socket.on('currentUserMsg', (currentUserMsg) => {
-    store.commit('msgModule/setCurrentUserMsg', currentUserMsg)
+
+  socket.on('currentRoomMsg', (currentRoomMsg) => {
+    store.commit('roomModule/setCurrentRoomMsg', currentRoomMsg)
     if (chatDetailRef.value) {
       chatDetailRef.value.scrollToBtm()
     }
   })
   socket.on('newUserConnect', (newUser) => {
     $q.notify({
-      message: newUser.userName + ' enters chat room!',
+      message: newUser.userName + ' is online now!',
       type: 'positive'
     })
-    store.commit('msgModule/newUserConnect', newUser)
-  })
-  socket.on('updateMembers', (msg) => {
-    testMsg.value = `這個${msg}`
-    allRooms.value[0].clients = msg
+    store.commit('roomModule/newUserConnect', newUser)
   })
 
-  socket.on('newMsgToClient', ({ content, from, to }) => {
-    for (let i = 0; i < allRooms.value.length; i++) {
-      const user = allRooms.value[i]
-      const fromSelf = socket.id === from
-      console.log('fromSelf:' + fromSelf)
-      if (user.userId === (fromSelf ? to : from)) {
-        user.msg.push({
-          content,
-          fromSelf
-        })
-        if (user.userId !== currentUserId.value) {
-          user.hasNewMessages = true
-        }
-        break
-      }
-    }
+  socket.on('newMsgToClient', (userData) => {
+    store.commit('roomModule/addCurrentRoomMsg', userData)
+    chatDetailRef.value.scrollToBtm()
   })
   socket.on('userDisconnect', (userData) => {
     $q.notify({
-      message: userData.userName + ' leaves chat room!',
+      message: userData.userName + ' is offline now!',
       type: 'negative'
     })
-    store.commit('msgModule/setUserIsOnline', userData)
+    store.commit('roomModule/setRoomIsOnline', userData)
   })
 })
 

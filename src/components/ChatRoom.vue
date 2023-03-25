@@ -44,7 +44,7 @@ import { useStore } from 'vuex'
 const store = useStore()
 const filterText = ref<string>('')
 const roomsDisplay = computed(function () {
-  return store.state.msgModule.allRooms.filter(aRoom => aRoom.userName.includes(filterText.value))
+  return store.state.roomModule.allRooms.filter(aRoom => aRoom.userName.includes(filterText.value))
 })
 
 </script>

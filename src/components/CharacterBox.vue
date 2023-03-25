@@ -49,7 +49,8 @@
 import socket from '@/utilities/socketConnection'
 import { computed, defineProps } from 'vue'
 import { useStore } from 'vuex'
-import { dayjsTz } from '@/utilities/helper'
+import { dayjsTz, sortString } from '@/utilities/helper'
+import { getUserID } from '@/utilities/localStorage'
 
 const props = defineProps({
   room: { type: Object, required: true, default: () => ({}) },
@@ -57,10 +58,12 @@ const props = defineProps({
 })
 
 const store = useStore()
-const isCurrentUser = computed(() => store.getters['msgModule/isCurrentRoom'](props.room._id))
+const isCurrentUser = computed(() => store.getters['roomModule/isCurrentRoom'](props.room._id))
 function changeRoomHandler (userData) {
-  store.commit('msgModule/setCurrentUserData', userData)
-  socket.emit('changeRoom', userData)
+  store.commit('roomModule/setCurrentRoomUser', userData)
+  const sortedIds = sortString(userData._id, getUserID() as string)
+  const roomID = sortedIds.join('-')
+  socket.emit('changeRoom', roomID)
 }
 function getLatestMsgFromNow (time: string) {
   return time

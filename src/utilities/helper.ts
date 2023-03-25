@@ -10,3 +10,7 @@ dayjs.extend(timezone)
 export function dayjsTz (value?: string): dayjs.Dayjs {
   return dayjs(value).tz('Asia/Taipei')
 }
+
+export function sortString (value1: string, value2: string): string[] {
+  return [value1, value2].sort((a, b) => a.localeCompare(b))
+}

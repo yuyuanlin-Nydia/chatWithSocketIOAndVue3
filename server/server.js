@@ -42,23 +42,23 @@ io.use((socket, next) => {
 
 io.on('connection', (socket) => {
   console.log('connected')
-  socket.on('authenticate', async ({ token }, callback) => {
+  socket.on('authenticate', async (token, callback) => {
     try {
-      socket.userData = await User.findOne({ tokens: { $elemMatch: { token } } })
       socket.token = token
       socket.userData = await User.findOneAndUpdate(
-        { email: socket.userData?.email },
+        { tokens: { $elemMatch: { token } } },
         { $set: { isOnline: 1 } }
       )
       if (!socket.userData) {
         throw new Error('Token not found!')
       }
       callback({ success: true })
+      socket.broadcast.emit('newUserConnect', socket.userData)
       const userWithNewestMsg = await User.aggregate([
         {
           $match: {
             _id: {
-              $ne: socket.userData?._id
+              $ne: socket.userData._id
             }
           }
         },
@@ -106,26 +106,28 @@ io.on('connection', (socket) => {
           $sort: { 'latestMsgArr.sendAt': -1 }
         }
       ])
-      const currentUserMsg = await Message.find(
-        {
-          from: { $in: [socket.userData._id, userWithNewestMsg[0]._id] },
-          to: { $in: [socket.userData._id, userWithNewestMsg[0]._id] }
-        })
-      socket.emit('userWithNewestMsg', { userWithNewestMsg })
-      socket.emit('currentUserMsg', currentUserMsg)
-      socket.broadcast.emit('newUserConnect', socket.userData)
+      const sortedIds = [socket.userData._id.toString(), userWithNewestMsg[0]._id.toString()].sort((a, b) => a.localeCompare(b))
+      socket.roomID = sortedIds.join('-')
+      await socket.join(socket.roomID)
+      const currentRoomMsg = await Message.find({
+        roomID: socket.roomID
+      })
+      socket.emit('userWithNewestMsg', userWithNewestMsg)
+      socket.emit('currentRoomMsg', currentRoomMsg)
     } catch (err) {
       console.log(err)
     }
   })
-  socket.on('changeRoom', async (userData) => {
-    const currentUserMsg = await Message.find(
+  socket.on('changeRoom', async (roomID) => {
+    socket.leave(socket.roomID)
+    socket.roomID = roomID
+    socket.join(socket.roomID)
+    const currentRoomMsg = await Message.find(
       {
-        from: { $in: [socket.userData._id, userData._id] },
-        to: { $in: [socket.userData._id, userData._id] }
+        roomID: socket.roomID
       }
     )
-    socket.emit('currentUserMsg', currentUserMsg)
+    io.to(socket.roomID).emit('currentRoomMsg', currentRoomMsg)
   })
 
   //   // TODO:新增群組
@@ -133,15 +135,13 @@ io.on('connection', (socket) => {
   //   // io.socketsJoin('room1')
   //   // const sockets = await io.in('room1').fetchSockets()
 
-  // socket.on('privateMessage', ({ msg, to, from }) => {
-  //   const messageData = new Msg(msg)
-  //   messageData.save().then(() => {
-  //     socket.to(to).to(socket.id).emit('newMsgToClient', msg)
-  //   })
-  // })
+  socket.on('privateMessage', async (msgData) => {
+    const result = await Message.create(msgData)
+    io.to(msgData.roomID).emit('newMsgToClient', result)
+  })
 
   socket.on('disconnect', async () => {
-    // update the connection status
+    socket.leave(socket.roomID)
     const result = await User.findOneAndUpdate(
       { email: socket.userData?.email },
       { $set: { isOnline: 0 } }

@@ -2,8 +2,8 @@
   <div class="chatDetail">
     <div class="topPanel">
       <CharacterBox
-        v-if="currentUserData"
-        :room="currentUserData"
+        v-if="currentRoomUser"
+        :room="currentRoomUser"
         :is-top-panel="true"
       >
         <template #rightCon>
@@ -29,11 +29,11 @@
       ref="msgBoxRef"
       class="msgBox"
     >
-      <template v-if="currentUserMsg?.length>0">
+      <template v-if="currentRoomMsg.length">
         <div
-          v-for="(aMsg, index) in currentUserMsg"
+          v-for="(aMsg, index) in currentRoomMsg"
           :key="index"
-          :class="['eachMsgBox', aMsg.from !== currentUserData?._id ? 'myMsg':'notMyMsg']"
+          :class="['eachMsgBox', aMsg.from !== currentRoomUser._id ? 'myMsg':'notMyMsg']"
         >
           <img
             src="https://picsum.photos/30/30"
@@ -63,7 +63,7 @@
         class="input"
         type="text"
         placeholder="write your message..."
-        @keyup.enter="msgSubmitHandler"
+        @keyup.enter="inputMsg? msgSubmitHandler():null"
       >
       <q-btn
         round
@@ -81,15 +81,15 @@
 <script lang="ts" setup>
 import CharacterBox from '@/components/CharacterBox.vue'
 import { computed, ref, nextTick, defineExpose } from 'vue'
-import { dayjsTz } from '@/utilities/helper'
-
+import { dayjsTz, sortString } from '@/utilities/helper'
 import { useStore } from 'vuex'
 import { getUserID } from '@/utilities/localStorage'
+import socket from '@/utilities/socketConnection'
 
 const inputMsg = ref<string>('')
 const store = useStore()
-const currentUserData = computed(() => store.state.msgModule.currentUserData)
-const currentUserMsg = computed(() => store.state.msgModule.currentUserMsg)
+const currentRoomUser = computed(() => store.state.roomModule.currentRoomUser)
+const currentRoomMsg = computed(() => store.state.roomModule.currentRoomMsg)
 const msgBoxRef = ref<HTMLDivElement>()
 
 defineExpose({
@@ -104,13 +104,16 @@ function scrollToBtm () {
   })
 }
 async function msgSubmitHandler () {
-  await store.dispatch('msgModule/addMessage', {
+  const sortedIds = sortString(currentRoomUser.value._id, getUserID() as string)
+  const roomID = sortedIds.join('-')
+  const msgData = {
+    roomID,
     msg: inputMsg.value,
-    to: currentUserData.value._id,
+    to: currentRoomUser.value._id,
     from: getUserID() as string,
     sendAt: Date.now
-  })
-  scrollToBtm()
+  }
+  socket.emit('privateMessage', msgData)
   inputMsg.value = ''
 }
 </script>
