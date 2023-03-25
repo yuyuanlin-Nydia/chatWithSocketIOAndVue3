@@ -59,6 +59,7 @@
     <!-- 下方輸入框 -->
     <div class="msgInputBox">
       <input
+        ref="inputMsgRef"
         v-model="inputMsg"
         class="input"
         type="text"
@@ -80,17 +81,22 @@
 
 <script lang="ts" setup>
 import CharacterBox from '@/components/CharacterBox.vue'
-import { computed, ref, nextTick, defineExpose } from 'vue'
+import { computed, ref, nextTick, defineExpose, watch } from 'vue'
 import { dayjsTz, sortString } from '@/utilities/helper'
 import { useStore } from 'vuex'
 import { getUserID } from '@/utilities/localStorage'
 import socket from '@/utilities/socketConnection'
 
 const inputMsg = ref<string>('')
+const inputMsgRef = ref<HTMLInputElement | null>(null)
 const store = useStore()
 const currentRoomUser = computed(() => store.state.roomModule.currentRoomUser)
 const currentRoomMsg = computed(() => store.state.roomModule.currentRoomMsg)
 const msgBoxRef = ref<HTMLDivElement>()
+
+watch(currentRoomUser, () => {
+  if (inputMsgRef.value) { inputMsgRef.value.focus() }
+})
 
 defineExpose({
   scrollToBtm
