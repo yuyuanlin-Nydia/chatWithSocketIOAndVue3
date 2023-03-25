@@ -29,7 +29,7 @@
       ref="msgBoxRef"
       class="msgBox"
     >
-      <template v-if="currentRoomMsg.length">
+      <template v-if="currentRoomUser && currentRoomMsg.length">
         <div
           v-for="(aMsg, index) in currentRoomMsg"
           :key="index"

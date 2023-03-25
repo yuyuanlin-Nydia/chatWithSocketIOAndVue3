@@ -6,7 +6,6 @@ import { Server } from 'socket.io'
 import cors from 'cors'
 import { connectMongoDB } from './mongoose.js'
 import { userRouter } from './routes/user.js'
-import { messageRouter } from './routes/message.js'
 
 const app = express()
 connectMongoDB()
@@ -30,7 +29,6 @@ app
   .use(cors(corsOptions))
   .use(express.json())
   .use('/user', userRouter)
-  .use('/message', messageRouter)
 
 httpServer.listen(3000)
 
