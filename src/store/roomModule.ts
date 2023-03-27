@@ -1,5 +1,3 @@
-import { postApi } from '@/plugin/axios'
-import { ApiUrl } from '@/enum/apiEnum'
 import { Module } from 'vuex'
 
 const roomModule: Module<any, any> = {
@@ -46,6 +44,14 @@ const roomModule: Module<any, any> = {
     },
     addCurrentRoomMsg (state, payload): void {
       state.currentRoomMsg.push(payload)
+    },
+    updateRoomWithLatestMsg (state, payload): void {
+      console.log(state.currentRoomUser)
+      state.allRooms.forEach((item) => {
+        if (item._id === state.currentRoomUser._id) {
+          item.latestMsgArr[0] = payload
+        }
+      })
     }
   },
   actions: {

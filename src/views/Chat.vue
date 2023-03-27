@@ -56,6 +56,7 @@ socket.on('connect', () => {
 
   socket.on('newMsgToClient', (msgData) => {
     store.commit('roomModule/addCurrentRoomMsg', msgData)
+    store.commit('roomModule/updateRoomWithLatestMsg', msgData)
     if (chatDetailRef.value) {
       chatDetailRef.value.scrollToBtm()
     }
