@@ -2,11 +2,15 @@
   <div class="chat">
     <ChatRoom />
     <ChatDetail ref="chatDetailRef" />
+    <q-inner-loading
+      :showing="isLoading"
+      style="z-index: 100;"
+    />
   </div>
 </template>
 
 <script lang="ts" setup>
-import { ref, computed } from 'vue'
+import { ref } from 'vue'
 import ChatRoom from '@/components/ChatRoom.vue'
 import ChatDetail from '@/layout/ChatDetail.vue'
 import socket from '@/utilities/socketConnection'
@@ -16,7 +20,9 @@ import { useQuasar } from 'quasar'
 
 const $q = useQuasar()
 const store = useStore()
-const chatDetailRef = ref()
+const chatDetailRef = ref<typeof ChatDetail | null>(null)
+const isLoading = ref<boolean>(true)
+
 socket.connect()
 socket.on('connect', () => {
   const token = getToken()
@@ -31,6 +37,7 @@ socket.on('connect', () => {
   socket.on('userWithNewestMsg', (userWithNewestMsg) => {
     store.commit('roomModule/setRooms', userWithNewestMsg)
     store.commit('roomModule/setCurrentRoomUser', userWithNewestMsg[0])
+    isLoading.value = false
   })
 
   socket.on('currentRoomMsg', (currentRoomMsg) => {
@@ -47,9 +54,11 @@ socket.on('connect', () => {
     store.commit('roomModule/newUserConnect', newUser)
   })
 
-  socket.on('newMsgToClient', (userData) => {
-    store.commit('roomModule/addCurrentRoomMsg', userData)
-    chatDetailRef.value.scrollToBtm()
+  socket.on('newMsgToClient', (msgData) => {
+    store.commit('roomModule/addCurrentRoomMsg', msgData)
+    if (chatDetailRef.value) {
+      chatDetailRef.value.scrollToBtm()
+    }
   })
   socket.on('userDisconnect', (userData) => {
     $q.notify({

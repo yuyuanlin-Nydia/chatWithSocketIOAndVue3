@@ -25,7 +25,7 @@
         >
           <!-- TODO:這邊上線給0或1要建enum；不是單純三元運算子=>改成computed -->
           <span v-if="isTopPanel">{{ room.isOnline? 'ONLINE':'OFFLINE' }}</span>
-          <span v-else-if="room.latestMsgArr.length"> {{ room.latestMsgArr[0].latest }}</span>
+          <span v-else-if="room.latestMsgArr.length"> {{ room.latestMsgArr[0].msg }}</span>
           <span v-else>Now!You can send messages!!</span>
         </p>
       </div>

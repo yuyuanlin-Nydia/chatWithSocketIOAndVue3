@@ -1,6 +1,6 @@
 import { connect } from 'mongoose'
 
-const mongoDBUrl = 'mongodb+srv://sandy6513a:rdtest1153@cluster0.sczfsqy.mongodb.net/?retryWrites=true&w=majority'
+const mongoDBUrl = 'mongodb+srv://sandy6513a:rdtest1153@cluster0.sczfsqy.mongodb.net/?retryWrites=true'
 export function connectMongoDB () {
   connect(mongoDBUrl, { dbName: 'messageDB' })
     .then((m) => {

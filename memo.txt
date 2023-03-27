@@ -16,3 +16,14 @@ https://github.com/microsoft/vscode-eslint/issues/696
 https://hackmd.io/@s_jpXuNwRQiUuGCOQAOZuA/rkZhZEBHc
 終端機報錯找不到變數，後來重新安裝，將版本從7>10.1.1才正常
 SCSS顏色變數黨全局引入:https://hackmd.io/@s_jpXuNwRQiUuGCOQAOZuA/rkZhZEBHc
+
+mongoDB使用explain查詢報錯 => Option "explain" cannot be used on an aggregate call with writeConcern
+https://github.com/Automattic/mongoose/issues/9025
+
+預計新增功能:
+*暗黑模式
+*新增編輯/刪除訊息
+*訊息上傳圖片/檔案
+*新增群組
+*撥打電話
+*設定個人檔案圖片

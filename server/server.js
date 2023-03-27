@@ -78,14 +78,13 @@ io.on('connection', (socket) => {
                 }
               },
               { $sort: { sendAt: -1 } },
-
               { $limit: 1 },
               {
                 $project: {
                   _id: 0,
                   from: '$from',
                   to: '$to',
-                  latest: '$msg',
+                  msg: '$msg',
                   sendAt: '$sendAt'
                 }
               }
@@ -117,15 +116,19 @@ io.on('connection', (socket) => {
     }
   })
   socket.on('changeRoom', async (roomID) => {
-    socket.leave(socket.roomID)
-    socket.roomID = roomID
-    socket.join(socket.roomID)
-    const currentRoomMsg = await Message.find(
-      {
-        roomID: socket.roomID
-      }
-    )
-    io.to(socket.roomID).emit('currentRoomMsg', currentRoomMsg)
+    try {
+      socket.leave(socket.roomID)
+      socket.roomID = roomID
+      socket.join(socket.roomID)
+      const currentRoomMsg = await Message.find(
+        {
+          roomID: socket.roomID
+        }
+      )
+      io.to(socket.roomID).emit('currentRoomMsg', currentRoomMsg)
+    } catch (err) {
+      console.log(err)
+    }
   })
 
   //   // TODO:新增群組
@@ -134,20 +137,28 @@ io.on('connection', (socket) => {
   //   // const sockets = await io.in('room1').fetchSockets()
 
   socket.on('privateMessage', async (msgData) => {
-    const result = await Message.create(msgData)
-    io.to(msgData.roomID).emit('newMsgToClient', result)
+    try {
+      const result = await Message.create(msgData)
+      io.to(msgData.roomID).emit('newMsgToClient', result)
+    } catch (err) {
+      console.log(err)
+    }
   })
 
   socket.on('disconnect', async () => {
-    socket.leave(socket.roomID)
-    const result = await User.findOneAndUpdate(
-      { email: socket.userData?.email },
-      { $set: { isOnline: 0 } }
-    ).catch(err =>
-      console.error(`Failed to find and update document: ${err}`)
-    )
-    if (result) {
-      socket.broadcast.emit('userDisconnect', result)
+    try {
+      socket.leave(socket.roomID)
+      const result = await User.findOneAndUpdate(
+        { email: socket.userData?.email },
+        { $set: { isOnline: 0 } }
+      ).catch(err =>
+        console.error(`Failed to find and update document: ${err}`)
+      )
+      if (result) {
+        socket.broadcast.emit('userDisconnect', result)
+      }
+    } catch (err) {
+      console.log(err)
     }
   })
 })
