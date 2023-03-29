@@ -13,7 +13,8 @@ interface ServerToClientEvents {
   updateMembers:(b: any)=>void;
   userDisconnect:(value: any)=>void
   loginStat:(value: number)=>void,
-  currentRoomMsg:(msg: IMessage[])=>void
+  currentRoomMsg:(msg: IMessage[]) => void
+  updateMsgWithReadSuccess:() => void,
 }
 interface IAuthenticateCb {
   (message: {success: boolean}): void;
@@ -23,6 +24,7 @@ interface ClientToServerEvents {
   privateMessage:(b: any) =>void;
   changeRoom:(msg: any) => void;
   authenticate:(msg: string, callback: IAuthenticateCb) => void,
+  updateMsgWithRead:(msg: string) => void,
 }
 
 interface InterServerEvents {

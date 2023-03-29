@@ -46,10 +46,31 @@ const roomModule: Module<any, any> = {
       state.currentRoomMsg.push(payload)
     },
     updateRoomWithLatestMsg (state, payload): void {
-      console.log(state.currentRoomUser)
+      const [filteredRoom] = state.allRooms.filter((item) => { return item._id === payload.from || item._id === payload.to })
+      const index = state.allRooms.findIndex((item) => { return item._id === payload.from || item._id === payload.to })
+      filteredRoom.latestMsg = payload
+      state.allRooms.splice(index, 1)
+      state.allRooms.unshift(filteredRoom)
+    },
+    updateRoomWithUnreadAmount (state, payload) {
+      state.allRooms.forEach((item) => {
+        if (item._id === payload.from) {
+          item.unReadMsgAmount += 1
+        }
+      })
+    },
+    updateRoomWithRead (state) {
       state.allRooms.forEach((item) => {
         if (item._id === state.currentRoomUser._id) {
-          item.latestMsgArr[0] = payload
+          item.unReadMsgAmount = 0
+        }
+      })
+    },
+    updateAllMsgWithRead (state) {
+      state.currentRoomMsg = state.currentRoomMsg.map((item) => {
+        return {
+          ...item,
+          isRead: true
         }
       })
     }

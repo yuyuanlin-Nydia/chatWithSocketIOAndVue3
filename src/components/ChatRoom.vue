@@ -7,6 +7,7 @@
       placeholder="Search user"
       dense
       color="grey"
+      style="background-color: white;"
     >
       <template #prepend>
         <q-icon
@@ -57,6 +58,8 @@ const roomsDisplay = computed(function () {
   display: flex;
   flex-direction: column;
   justify-content: space-between;
+  background-color: $bg-lightGrey;
+  margin-right: 5px;
   .roomBox{
     overflow-y: auto;
     overflow-x: hidden;

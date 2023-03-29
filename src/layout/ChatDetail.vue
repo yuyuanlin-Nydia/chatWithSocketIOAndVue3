@@ -1,80 +1,97 @@
 <template>
-  <div class="chatDetail">
-    <div class="topPanel">
-      <CharacterBox
-        v-if="currentRoomUser"
-        :room="currentRoomUser"
-        :is-top-panel="true"
+  <div style="width: 100%;">
+    <div
+      v-if="currentRoomUser"
+      class="chatDetail"
+    >
+      <div class="topPanel">
+        <CharacterBox
+          :room="currentRoomUser"
+          :is-top-panel="true"
+        >
+          <template #rightCon>
+            <div>
+              <q-btn
+                flat
+                icon="fa-regular fa-star"
+                size="sm"
+                round
+              />
+              <q-btn
+                flat
+                icon="fa-solid fa-info"
+                size="sm"
+                round
+              />
+            </div>
+          </template>
+        </CharacterBox>
+      </div>
+      <!-- 訊息顯示 -->
+      <div
+        ref="msgBoxRef"
+        class="msgBox"
       >
-        <template #rightCon>
-          <div>
-            <q-btn
-              flat
-              icon="fa-regular fa-star"
-              size="sm"
-              round
-            />
-            <q-btn
-              flat
-              icon="fa-solid fa-info"
-              size="sm"
-              round
-            />
+        <template v-if="currentRoomMsg && currentRoomMsg.length">
+          <div
+            v-for="(aMsg, index) in currentRoomMsg"
+            :key="index"
+            :class="['eachMsgBox', aMsg.from !== currentRoomUser._id ? 'myMsg':'notMyMsg']"
+          >
+            <img
+              src="https://picsum.photos/30/30"
+              alt=""
+              style="border-radius:50%"
+            >
+            <div class="dataDisplay">
+              <span
+                class="aMsgDetail"
+              >
+                {{ aMsg.isRead && aMsg.from !== currentRoomUser._id ? "已讀":null }} <br>
+                {{ dayjsTz(aMsg.sendAt).format('YYYY-MM-DD HH:mm') }}
+              </span>
+              <span class="msgText">
+                {{ aMsg.msg }}
+              </span>
+            </div>
           </div>
         </template>
-      </CharacterBox>
-    </div>
-    <!-- 訊息顯示 -->
-    <div
-      ref="msgBoxRef"
-      class="msgBox"
-    >
-      <template v-if="currentRoomUser && currentRoomMsg.length">
-        <div
-          v-for="(aMsg, index) in currentRoomMsg"
-          :key="index"
-          :class="['eachMsgBox', aMsg.from !== currentRoomUser._id ? 'myMsg':'notMyMsg']"
-        >
-          <img
-            src="https://picsum.photos/30/30"
-            alt=""
-            style="border-radius:50%"
-          >
-          <div class="dataDisplay">
-            <span>
-              {{ dayjsTz(aMsg.sendAt).format('YYYY-MM-DD HH:mm') }}
-            </span>
-            <span class="msgText">
-              {{ aMsg.msg }}
-            </span>
+        <template v-else>
+          <div class="noMsgTxt">
+            <p> There is no messages yet!</p>
           </div>
-        </div>
-      </template>
-      <template v-else>
-        <div class="noMsgTxt">
-          <p> There is no messages yet!</p>
-        </div>
-      </template>
+        </template>
+      </div>
+      <!-- 下方輸入框 -->
+      <div class="msgInputBox">
+        <input
+          ref="inputMsgRef"
+          v-model="inputMsg"
+          class="input"
+          type="text"
+          placeholder="write your message..."
+          @keyup.enter="inputMsg? msgSubmitHandler():null"
+          @focus="isFocus = true"
+          @blur="isFocus = false"
+        >
+        <q-btn
+          round
+          size="sm"
+          icon="fa-solid fa-paper-plane"
+          color="orange"
+          text-color="black"
+          :disabled="!inputMsg"
+          @click="msgSubmitHandler"
+        />
+      </div>
     </div>
-    <!-- 下方輸入框 -->
-    <div class="msgInputBox">
-      <input
-        ref="inputMsgRef"
-        v-model="inputMsg"
-        class="input"
-        type="text"
-        placeholder="write your message..."
-        @keyup.enter="inputMsg? msgSubmitHandler():null"
-      >
-      <q-btn
-        round
-        size="sm"
-        icon="fa-solid fa-paper-plane"
-        color="orange"
-        text-color="black"
-        :disabled="!inputMsg"
-        @click="msgSubmitHandler"
-      />
+    <div
+      v-else
+      class="flex items-center justify-center emptyBg"
+    >
+      <h6>
+        Please select chat room!
+      </h6>
     </div>
   </div>
 </template>
@@ -93,13 +110,18 @@ const store = useStore()
 const currentRoomUser = computed(() => store.state.roomModule.currentRoomUser)
 const currentRoomMsg = computed(() => store.state.roomModule.currentRoomMsg)
 const msgBoxRef = ref<HTMLDivElement>()
+const isFocus = ref<boolean>(false)
 
-watch(currentRoomUser, () => {
-  if (inputMsgRef.value) { inputMsgRef.value.focus() }
+watch(currentRoomUser, async () => {
+  await nextTick()
+  if (inputMsgRef.value) {
+    inputMsgRef.value.focus()
+  }
 })
 
 defineExpose({
-  scrollToBtm
+  scrollToBtm,
+  isFocus
 })
 
 function scrollToBtm () {
@@ -130,6 +152,8 @@ async function msgSubmitHandler () {
   flex-direction: column;
   padding:0 10px;
   width: 100%;
+  height: 100%;
+  background-color: $bg-lightGrey;
   .topPanel{
     height: 100px;
   }
@@ -138,7 +162,6 @@ async function msgSubmitHandler () {
     padding:0 10px;
     height: calc(100% - 180px);
     overflow-y: auto;
-    background-color: #FCFBFC;
   }
 }
 .noMsgTxt{
@@ -168,15 +191,23 @@ async function msgSubmitHandler () {
     border-radius: 12px 12px 0 12px;
     color: white;
     background-color: $bg-primary-blue;
-    padding: 10px;
   }
+}
+.msgText{
+  padding: 7px 10px;
+}
+.aMsgDetail{
+  text-align: right;
+  line-height: 1rem;
+  color: $darkGrey;
+  font-size: 0.7rem;
+  color: $text-secondary-grey;
 }
 .notMyMsg{
   flex-direction: row;
   .msgText{
     background-color: white;
     border-radius: 12px 12px 12px 0px;
-    padding: 10px;
   }
   .dataDisplay{
     flex-direction: row-reverse;
@@ -191,5 +222,10 @@ async function msgSubmitHandler () {
  input{
     width: 93%;
  }
+}
+.emptyBg{
+  height: 100%;
+  width: 100%;
+  background-color: $bg-lightGrey;
 }
 </style>

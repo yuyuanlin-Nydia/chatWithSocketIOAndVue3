@@ -20,12 +20,10 @@
         <div>
           {{ room.userName }} <br>
         </div>
-        <p
-          class="latestMsg"
-        >
+        <p class="latestMsg">
           <!-- TODO:這邊上線給0或1要建enum；不是單純三元運算子=>改成computed -->
           <span v-if="isTopPanel">{{ room.isOnline? 'ONLINE':'OFFLINE' }}</span>
-          <span v-else-if="room.latestMsgArr.length"> {{ room.latestMsgArr[0].msg }}</span>
+          <span v-else-if="room.latestMsg"> {{ room.latestMsg.msg }}</span>
           <span v-else>Now!You can send messages!!</span>
         </p>
       </div>
@@ -34,12 +32,13 @@
     <slot name="rightCon">
       <div class="timeAndMsgNo">
         <div class="text-secondary-grey text-right">
-          {{ getLatestMsgFromNow(room.latestMsgArr[0]?.sendAt) }}
+          {{ getLatestMsgFromNow(room.latestMsg?.sendAt) }}
         </div>
         <span
-          v-show="room.hasNewMessages"
+          :style="{
+            visibility:room.unReadMsgAmount? 'visible': 'hidden'}"
           class="MsgNo"
-        >{{ room.hasNewMessages }}</span>
+        >{{ room.unReadMsgAmount }}</span>
       </div>
     </slot>
   </div>
@@ -59,11 +58,15 @@ const props = defineProps({
 
 const store = useStore()
 const isCurrentUser = computed(() => store.getters['roomModule/isCurrentRoom'](props.room._id))
-function changeRoomHandler (userData) {
-  store.commit('roomModule/setCurrentRoomUser', userData)
-  const sortedIds = sortString(userData._id, getUserID() as string)
+function changeRoomHandler (roomData) {
+  store.commit('roomModule/setCurrentRoomUser', roomData)
+  const sortedIds = sortString(roomData._id, getUserID() as string)
   const roomID = sortedIds.join('-')
   socket.emit('changeRoom', roomID)
+  if (roomData.unReadMsgAmount) {
+    store.commit('roomModule/updateRoomWithRead')
+    socket.emit('updateMsgWithRead', roomData.roomID)
+  }
 }
 function getLatestMsgFromNow (time: string) {
   return time
@@ -78,8 +81,8 @@ function getLatestMsgFromNow (time: string) {
   align-items: center;
   justify-content: space-between;
   padding: 0.8rem;
-  background-color: #FCFBFC;
   border-left: 5px transparent solid;
+  background-color: white;
   cursor: pointer;
   border-radius: 5px;
   margin: 15px 0;
@@ -104,12 +107,13 @@ function getLatestMsgFromNow (time: string) {
       }
     }
     .latestMsg{
-     display: -webkit-box;
-     -webkit-line-clamp: 1;
-     -webkit-box-orient: vertical;
-     overflow: hidden;
-     color:$text-secondary-grey;
-     margin: 0;
+      display: -webkit-box;
+      -webkit-line-clamp: 1;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+      color:$text-secondary-grey;
+      margin: 0;
+      width: 80px;
     }
 
     .textMain{
@@ -126,12 +130,11 @@ function getLatestMsgFromNow (time: string) {
     justify-content: center;
     align-items: flex-end;
     .MsgNo{
-      width: 30px;
-      height: 30px;
+      width: 22px;
+      height: 22px;
       background-color:$bg-secondary ;
       color: #FCFBFC;
       border-radius: 50%;
-      padding: 5%;
       display: grid;
       place-content: center center ;
     }

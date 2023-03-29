@@ -85,11 +85,47 @@ io.on('connection', (socket) => {
                   from: '$from',
                   to: '$to',
                   msg: '$msg',
-                  sendAt: '$sendAt'
+                  sendAt: '$sendAt',
+                  roomID: '$roomID'
                 }
               }
             ],
-            as: 'latestMsgArr'
+            as: 'latestMsg'
+          }
+        },
+        {
+          $lookup: {
+            from: 'messages',
+            let: { latestMsgRoomID: '$latestMsg.roomID' },
+            pipeline: [
+              {
+                $match: {
+                  $expr: { $in: ['$roomID', '$$latestMsgRoomID'] },
+                  isRead: false,
+                  to: socket.userData._id
+                }
+              },
+              { $count: 'unReadMsgAmount' }
+            ],
+            as: 'unReadMsgAmount'
+          }
+        },
+        {
+          $addFields: {
+            latestMsg: {
+              $cond: {
+                if: { $gt: [{ $size: '$latestMsg' }, 0] },
+                then: { $arrayElemAt: ['$latestMsg', 0] },
+                else: null
+              }
+            },
+            unReadMsgAmount: {
+              $cond: {
+                if: { $gt: [{ $size: '$unReadMsgAmount' }, 0] },
+                then: { $arrayElemAt: ['$unReadMsgAmount.unReadMsgAmount', 0] },
+                else: 0
+              }
+            }
           }
         },
         {
@@ -99,31 +135,37 @@ io.on('connection', (socket) => {
             registerDate: 0
           }
         },
-        {
-          $sort: { 'latestMsgArr.sendAt': -1 }
-        }
+        { $sort: { 'latestMsg.sendAt': -1 } }
       ])
-      const sortedIds = [socket.userData._id.toString(), userWithNewestMsg[0]._id.toString()].sort((a, b) => a.localeCompare(b))
-      socket.roomID = sortedIds.join('-')
-      await socket.join(socket.roomID)
-      const currentRoomMsg = await Message.find({
-        roomID: socket.roomID
+
+      const allRooms = await Message.aggregate([
+        {
+          $match: {
+            roomID: { $regex: socket.userData._id.toString() }
+          }
+        },
+        { $group: { _id: '$roomID' } },
+        {
+          $group: {
+            _id: null,
+            roomIDs: { $push: '$_id' }
+          }
+        },
+        { $project: { _id: 0, roomIDs: 1 } }
+      ])
+      allRooms[0].roomIDs.forEach((room) => {
+        socket.join(room)
       })
       socket.emit('userWithNewestMsg', userWithNewestMsg)
-      socket.emit('currentRoomMsg', currentRoomMsg)
     } catch (err) {
       console.log(err)
     }
   })
   socket.on('changeRoom', async (roomID) => {
     try {
-      socket.leave(socket.roomID)
       socket.roomID = roomID
-      socket.join(socket.roomID)
       const currentRoomMsg = await Message.find(
-        {
-          roomID: socket.roomID
-        }
+        { roomID: socket.roomID }
       )
       io.to(socket.roomID).emit('currentRoomMsg', currentRoomMsg)
     } catch (err) {
@@ -139,7 +181,19 @@ io.on('connection', (socket) => {
   socket.on('privateMessage', async (msgData) => {
     try {
       const result = await Message.create(msgData)
-      io.to(msgData.roomID).emit('newMsgToClient', result)
+      io.to(msgData.roomID).emit('newMsgToClient', result) // 聊天室所有人 => 更新詳細訊息
+    } catch (err) {
+      console.log(err)
+    }
+  })
+
+  socket.on('updateMsgWithRead', async () => {
+    try {
+      await Message.updateMany(
+        { roomID: socket.roomID },
+        { $set: { isRead: true } }
+      )
+      socket.to(socket.roomID).emit('updateMsgWithReadSuccess')
     } catch (err) {
       console.log(err)
     }
@@ -147,7 +201,6 @@ io.on('connection', (socket) => {
 
   socket.on('disconnect', async () => {
     try {
-      socket.leave(socket.roomID)
       const result = await User.findOneAndUpdate(
         { email: socket.userData?.email },
         { $set: { isOnline: 0 } }

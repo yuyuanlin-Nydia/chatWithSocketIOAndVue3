@@ -1,7 +1,9 @@
 <template>
   <div class="chat">
     <ChatRoom />
-    <ChatDetail ref="chatDetailRef" />
+    <ChatDetail
+      ref="chatDetailRef"
+    />
     <q-inner-loading
       :showing="isLoading"
       style="z-index: 100;"
@@ -10,7 +12,7 @@
 </template>
 
 <script lang="ts" setup>
-import { ref } from 'vue'
+import { ref, watch, computed } from 'vue'
 import ChatRoom from '@/components/ChatRoom.vue'
 import ChatDetail from '@/layout/ChatDetail.vue'
 import socket from '@/utilities/socketConnection'
@@ -22,6 +24,13 @@ const $q = useQuasar()
 const store = useStore()
 const chatDetailRef = ref<typeof ChatDetail | null>(null)
 const isLoading = ref<boolean>(true)
+const currentRoomUser = computed(() => {
+  return store.state.roomModule.currentRoomUser
+})
+
+watch(() => chatDetailRef.value?.isFocus, (newVal) => { // 如果輸入框有聚焦 收到的訊息要已讀
+  if (newVal && currentRoomUser.value?.unReadMsgAmount) { socket.emit('updateMsgWithRead', currentRoomUser.value.latestMsg.roomID) }
+})
 
 socket.connect()
 socket.on('connect', () => {
@@ -36,7 +45,6 @@ socket.on('connect', () => {
 
   socket.on('userWithNewestMsg', (userWithNewestMsg) => {
     store.commit('roomModule/setRooms', userWithNewestMsg)
-    store.commit('roomModule/setCurrentRoomUser', userWithNewestMsg[0])
     isLoading.value = false
   })
 
@@ -46,6 +54,7 @@ socket.on('connect', () => {
       chatDetailRef.value.scrollToBtm()
     }
   })
+
   socket.on('newUserConnect', (newUser) => {
     $q.notify({
       message: newUser.userName + ' is online now!',
@@ -54,12 +63,18 @@ socket.on('connect', () => {
     store.commit('roomModule/newUserConnect', newUser)
   })
 
-  socket.on('newMsgToClient', (msgData) => {
+  socket.on('newMsgToClient', (msgData) => { // 聊天室的人收到
     store.commit('roomModule/addCurrentRoomMsg', msgData)
     store.commit('roomModule/updateRoomWithLatestMsg', msgData)
+    store.commit('roomModule/updateRoomWithUnreadAmount', msgData)
     if (chatDetailRef.value) {
       chatDetailRef.value.scrollToBtm()
     }
+  })
+
+  socket.on('updateMsgWithReadSuccess', () => {
+    store.commit('roomModule/updateRoomWithRead')
+    store.commit('roomModule/updateAllMsgWithRead')
   })
   socket.on('userDisconnect', (userData) => {
     $q.notify({

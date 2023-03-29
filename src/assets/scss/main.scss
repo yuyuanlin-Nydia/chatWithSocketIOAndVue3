@@ -30,10 +30,10 @@ h1,h2,h3,h4,h5,h6{
   outline: none;
   border-radius: 5px;
   &:focus{
-    border:2px solid $dark-grey;
+    border:2px solid $darkGrey;
   }
   &:active{
-    border:2px solid $dark-grey;
+    border:2px solid $darkGrey;
   }
 }
 .btnActive{

@@ -159,7 +159,7 @@ watch(loginStat, (newValue) => {
       font-weight: bold;
     }
     .subTitle{
-      color: $dark-grey;
+      color: $darkGrey;
       margin: 2% 0 6% 0;
     }
     .loginBtn{
@@ -180,7 +180,7 @@ watch(loginStat, (newValue) => {
       flex-direction: column;
       >label{
         font-size: 12px;
-        color: $dark-grey;
+        color: $darkGrey;
         font-weight: 700;
         margin: 1.5% 0;
       }
