@@ -12,9 +12,8 @@ connectMongoDB()
 const httpServer = createServer(app)
 // 前端的http request會跨域
 const io = new Server(httpServer, {
-  cors: {
-    origin: 'http://localhost:8080'
-  }
+  cors: { origin: '*' },
+  transports: ['websocket']
 })
 const corsOptions = {
   origin: '*',
@@ -31,7 +30,7 @@ app
 httpServer.listen(port)
 
 io.use((socket, next) => {
-  const token = socket.handshake.auth.token.replace('Bearer ', '')
+  const token = socket.handshake.auth.token?.replace('Bearer ', '')
   if (token === 'null') next(new Error('token error'))
   next()
 })
