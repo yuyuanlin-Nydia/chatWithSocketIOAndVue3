@@ -18,19 +18,17 @@ const io = new Server(httpServer, {
 })
 const corsOptions = {
   origin: '*',
-  // origin: 'http://localhost:8080',
-  // credentials: false
   methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
   preflightContinue: false,
   optionsSuccessStatus: 204
 }
+const port = process.env.PORT || 3000
 
 app
   .use(cors(corsOptions))
   .use(express.json())
   .use('/user', userRouter)
-
-httpServer.listen(3000)
+httpServer.listen(port)
 
 io.use((socket, next) => {
   const token = socket.handshake.auth.token.replace('Bearer ', '')
