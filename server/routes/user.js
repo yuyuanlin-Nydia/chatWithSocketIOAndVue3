@@ -1,9 +1,8 @@
-import { MongoServerError } from 'mongodb'
-import auth from '../jwt-auth-middleware.js'
-import express from 'express'
-import { User } from '../models/user.js'
-
-export const userRouter = express.Router()
+const { MongoServerError } = require('mongodb')
+const auth = require('../jwt-auth-middleware.js')
+const express = require('express')
+const User = require('../models/user.js')
+const userRouter = express.Router()
 
 userRouter.post('/signup', async (req, res) => {
   try {
@@ -95,3 +94,5 @@ userRouter.post('/auth', (req, res) => {
     console.log(err)
   }
 })
+
+module.exports = { userRouter }

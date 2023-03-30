@@ -1,5 +1,5 @@
-import { Schema, model } from 'mongoose'
-import { ObjectId } from 'mongodb'
+const { Schema, model } = require('mongoose')
+const { ObjectId } = require('mongodb')
 
 const msgSchema = new Schema({
   roomID: {
@@ -27,5 +27,6 @@ const msgSchema = new Schema({
     default: false
   }
 })
+const Message = model('message', msgSchema)
 
-export const Message = model('message', msgSchema)
+module.exports = Message

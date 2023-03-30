@@ -1,13 +1,14 @@
-import { Message } from './models/message.js'
-import { User } from './models/user.js'
-import express from 'express'
-import { createServer } from 'http'
-import { Server } from 'socket.io'
-import cors from 'cors'
-import { connectMongoDB } from './mongoose.js'
-import { userRouter } from './routes/user.js'
-
+const path = require('path')
+const User = require('.//models/user')
+const Message = require('./models/message')
+const express = require('express')
+const { createServer } = require('http')
+const { Server } = require('socket.io')
+const cors = require('cors')
+const { connectMongoDB } = require('./mongoose')
+const { userRouter } = require('./routes/user')
 const app = express()
+
 connectMongoDB()
 const httpServer = createServer(app)
 // 前端的http request會跨域
@@ -26,7 +27,9 @@ const port = process.env.PORT || 3000
 app
   .use(cors(corsOptions))
   .use(express.json())
+  .use(express.static(path.join(__dirname, '/public')))
   .use('/user', userRouter)
+
 httpServer.listen(port)
 
 io.use((socket, next) => {
@@ -49,6 +52,7 @@ io.on('connection', (socket) => {
       }
       callback({ success: true })
       socket.broadcast.emit('newUserConnect', socket.userData)
+
       const userWithNewestMsg = await User.aggregate([
         {
           $match: {
@@ -150,7 +154,7 @@ io.on('connection', (socket) => {
         },
         { $project: { _id: 0, roomIDs: 1 } }
       ])
-      allRooms[0].roomIDs.forEach((room) => {
+      allRooms[0]?.roomIDs.forEach((room) => {
         socket.join(room)
       })
       socket.emit('userWithNewestMsg', userWithNewestMsg)

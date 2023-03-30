@@ -1,6 +1,7 @@
-import jwt from 'jsonwebtoken'
-import { User } from './models/user.js'
-export default async (req, res, next) => {
+const User = require('./models/user')
+const jwt = require('jsonwebtoken')
+
+module.exports = async (req, res, next) => {
   try {
     // 從來自客戶端請求的 header 取得和擷取 JWT
     const token = req.header('Authorization').replace('Bearer ', '')

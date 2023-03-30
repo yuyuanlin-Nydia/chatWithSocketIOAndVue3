@@ -1,6 +1,6 @@
-import { Schema, model } from 'mongoose'
-import bcrypt from 'bcrypt'
-import jwt from 'jsonwebtoken'
+const { Schema, model } = require('mongoose')
+const bcrypt = require('bcrypt')
+const jwt = require('jsonwebtoken')
 
 const userSchema = new Schema({
   email: {
@@ -66,6 +66,6 @@ userSchema.statics.findByCredentials = async (email, password) => {
   // 驗證成功時，回傳該用戶完整資料
   return user
 }
+const User = model('users', userSchema)
 
-export const User = model('users', userSchema)
-User.createIndexes()
+module.exports = User
