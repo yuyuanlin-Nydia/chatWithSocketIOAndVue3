@@ -7,10 +7,9 @@
     "npm": "7.x"
   },
   "scripts": {
+    "serve": "concurrently \"npm:serve:*\" -k",
     "serve:client": "vue-cli-service serve",
     "serve:server": "nodemon server",
-    "serve": "concurrently \"npm:serve:*\" -k",
-    "start": "concurrently \"npm:serve:*\" -k",
     "build": "vue-cli-service build",
     "lint": "vue-cli-service lint",
     "heroku-postbuild": "NPM_CONFIG_PRODUCTION=false npm install && npm run build"

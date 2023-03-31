@@ -1,19 +1,12 @@
-# client setup
+# dependency setup
 ```
 npm install
 ```
+# client & server setup 
 ```
 npm run serve
 ```
 
-
-# server setup
-```
-cd server
-```
-```
-nodemon server.js
-```
 
 
 ### Customize configuration
