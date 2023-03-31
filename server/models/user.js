@@ -47,7 +47,7 @@ userSchema.methods.generateAuthToken = async function () {
   // this 指向當前的使用者實例
   const user = this
   // 產生一組 JWT
-  const token = jwt.sign({ _id: user._id.toString() }, 'thisismynewproject')
+  const token = jwt.sign({ _id: user._id.toString() }, process.env.JWT_TOKEN)
   // 將該 token 存入資料庫中：讓使用者能跨裝置登入及登出
   user.tokens = user.tokens.concat({ token })
   await user.save()

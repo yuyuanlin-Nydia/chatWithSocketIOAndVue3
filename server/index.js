@@ -1,5 +1,6 @@
 const path = require('path')
-const User = require('.//models/user')
+const dotenv = require("dotenv");
+const User = require('./models/user')
 const Message = require('./models/message')
 const express = require('express')
 const { createServer } = require('http')
@@ -9,12 +10,12 @@ const { connectMongoDB } = require('./mongoose')
 const { userRouter } = require('./routes/user')
 const app = express()
 
+dotenv.config();
 connectMongoDB()
 const httpServer = createServer(app)
 // 前端的http request會跨域
 const io = new Server(httpServer, {
-  cors: { origin: '*' },
-  transports: ['websocket']
+  cors: { origin: '*' }
 })
 const corsOptions = {
   origin: '*',
@@ -23,13 +24,23 @@ const corsOptions = {
   optionsSuccessStatus: 204
 }
 const port = process.env.PORT || 3000
-
 app
   .use(cors(corsOptions))
   .use(express.json())
-  .use(express.static(path.join(__dirname, '/public')))
   .use('/user', userRouter)
 
+const __dirname1=path.resolve()
+
+if(process.env.NODE_ENV === "production"){
+  app.use(express.static(path.join(__dirname1,'/dist')))
+  app.get('*',(req, res) => {
+    res.sendFile(path.resolve(__dirname1, 'dist', 'index.html'))
+  })
+}else{
+  app.get('/',(req, res)=>{
+    res.send('success')
+  })
+}
 httpServer.listen(port)
 
 io.use((socket, next) => {
