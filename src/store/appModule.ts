@@ -4,7 +4,6 @@ import router from '@/router'
 import { Notify } from 'quasar'
 import { ApiUrl } from '@/enum/apiEnum'
 import { PageName } from '@/enum/pageNameEnum'
-
 import { postApi } from '@/plugin/axios'
 import socket from '@/utilities/socketConnection'
 

@@ -3,6 +3,8 @@
     <div
       v-if="currentRoomUser"
       class="chatDetail"
+      @click="onChatDetailClick"
+      @contextmenu="onChatDetailClick"
     >
       <div class="topPanel">
         <CharacterBox
@@ -33,6 +35,44 @@
         class="msgBox"
       >
         <template v-if="currentRoomMsg && currentRoomMsg.length">
+          <q-list
+            v-show="isOptionsShow"
+            ref="optionsRef"
+            v-click-outside="onClickOptionsOutside"
+            bordered
+            separator
+            dense
+            class="hiddenOptions"
+            :style="optionsListPosition"
+          >
+            <q-item
+              v-ripple
+              clickable
+              dense
+              @click="handleCopy"
+            >
+              <q-item-section avatar>
+                <q-icon name="fa-solid fa-copy" />
+              </q-item-section>
+              <q-item-section>
+                COPY
+              </q-item-section>
+            </q-item>
+            <q-item
+              v-if="currentMsgData && currentMsgData.from !==currentRoomUser._id "
+              v-ripple
+              clickable
+              dense
+              @click="handleUnsendMsg"
+            >
+              <q-item-section avatar>
+                <q-icon name="fa-solid fa-trash" />
+              </q-item-section>
+              <q-item-section>
+                UNSEND
+              </q-item-section>
+            </q-item>
+          </q-list>
           <div
             v-for="(aMsg, index) in currentRoomMsg"
             :key="index"
@@ -45,13 +85,17 @@
             >
             <div class="dataDisplay">
               <span
+                v-if="!aMsg.isUnsend"
                 class="aMsgDetail"
               >
-                {{ aMsg.isRead && aMsg.from !== currentRoomUser._id ? "已讀":null }} <br>
+                {{ aMsg.isRead && aMsg.from !== currentRoomUser._id ? "Read" : null }} <br>
                 {{ dayjsTz(aMsg.sendAt).format('YYYY-MM-DD HH:mm') }}
               </span>
-              <span class="msgText">
-                {{ aMsg.msg }}
+              <span
+                :class="['msgText', aMsg.isUnsend ? 'unsendMsg':'']"
+                @contextmenu="showOptions($event, aMsg)"
+              >
+                {{ aMsg.isUnsend? 'This msg has been unsent.' : aMsg.msg }}
               </span>
             </div>
           </div>
@@ -103,6 +147,7 @@ import { dayjsTz, sortString } from '@/utilities/helper'
 import { useStore } from 'vuex'
 import { getUserID } from '@/utilities/localStorage'
 import socket from '@/utilities/socketConnection'
+import { QList, useQuasar } from 'quasar'
 
 const inputMsg = ref<string>('')
 const inputMsgRef = ref<HTMLInputElement | null>(null)
@@ -111,6 +156,15 @@ const currentRoomUser = computed(() => store.state.roomModule.currentRoomUser)
 const currentRoomMsg = computed(() => store.state.roomModule.currentRoomMsg)
 const msgBoxRef = ref<HTMLDivElement>()
 const isFocus = ref<boolean>(false)
+const optionsRef = ref<QList | null>(null)
+const defaultOptionsListPosition: Record<string, string> = {
+  top: '0px',
+  left: '0px'
+}
+const optionsListPosition = ref<Record<string, string>>({ ...defaultOptionsListPosition })
+const isOptionsShow = ref<boolean>(false)
+const currentMsgData = ref<IMessage | null>(null)
+const $q = useQuasar()
 
 watch(currentRoomUser, async () => {
   await nextTick()
@@ -131,6 +185,7 @@ function scrollToBtm () {
     }
   })
 }
+
 async function msgSubmitHandler () {
   const sortedIds = sortString(currentRoomUser.value._id, getUserID() as string)
   const roomID = sortedIds.join('-')
@@ -144,6 +199,65 @@ async function msgSubmitHandler () {
   socket.emit('privateMessage', msgData)
   inputMsg.value = ''
 }
+
+async function showOptions (event, msgData) {
+  event.preventDefault()
+  event.stopPropagation()
+  if (msgData.isUnsend) return
+  currentMsgData.value = msgData
+  isOptionsShow.value = true
+  await nextTick()
+  calculateOptionsPosition(event)
+}
+
+function calculateOptionsPosition (event) {
+  const optionsRefWidth = optionsRef.value?.$el.clientWidth
+  const optionsRefHeight = optionsRef.value?.$el.clientHeight
+  var leftValue = (document.body.clientWidth - event.clientX < optionsRefWidth)
+    ? event.clientX - optionsRefWidth
+    : event.clientX
+  var topValue = (event.clientY > (msgBoxRef.value!.clientHeight / 2))
+    ? event.pageY - optionsRefHeight - 10
+    : event.pageY + 10
+  optionsListPosition.value = {
+    left: leftValue + 'px',
+    top: topValue + 'px'
+  }
+}
+
+function hideShowedOptions () {
+  isOptionsShow.value = false
+}
+
+function onClickOptionsOutside () {
+  hideShowedOptions()
+}
+
+function onChatDetailClick (event) {
+  if (event.target.classList.contains('msgText') && isOptionsShow.value) {
+    hideShowedOptions()
+  }
+}
+
+function handleUnsendMsg () {
+  isOptionsShow.value = false
+  socket.emit('unsendMsg', currentMsgData.value!._id)
+}
+
+function handleCopy () {
+  isOptionsShow.value = false
+  navigator.clipboard.writeText(currentMsgData.value!.msg)
+    .then(() => {
+      $q.notify({
+        message: 'Copy successfully!',
+        type: 'positive'
+      })
+    })
+}
+
+socket.on('unsendMsgSuccess', (msgID) => {
+  store.commit('roomModule/unsendMsg', msgID)
+})
 </script>
 
 <style lang="scss">
@@ -196,6 +310,13 @@ async function msgSubmitHandler () {
 .msgText{
   padding: 7px 10px;
 }
+.myMsg,.notMyMsg{
+  .unsendMsg{
+  background-color: transparent;
+  color: $text-secondary-grey;
+  border:1px solid $text-secondary-grey
+  }
+}
 .aMsgDetail{
   text-align: right;
   line-height: 1rem;
@@ -228,4 +349,12 @@ async function msgSubmitHandler () {
   width: 100%;
   background-color: $bg-lightGrey;
 }
+.hiddenOptions{
+  position: absolute;
+  z-index: 100;
+  background-color: white;
+  height: fit-content;
+  width: fit-content;
+}
+
 </style>

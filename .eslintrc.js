@@ -23,5 +23,13 @@ module.exports = {
     indent: ['error', 2],
     'vue/no-unused-components': process.env.NODE_ENV === 'production' ? 1 : 0,
     'standard/no-callback-literal': [0, ['cb', 'callback']]
-  }
+  },
+  overrides: [
+    {
+      "files": ["*.vue"],
+      "rules": {
+        "no-undef": "off"  //因為.d.ts會無法自動import型別
+      }
+    }
+  ]
 }

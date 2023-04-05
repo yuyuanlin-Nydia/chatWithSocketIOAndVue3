@@ -35,7 +35,7 @@
     "tests/**/*.ts",
     "tests/**/*.tsx",
     "/src/**/*.d.ts"
-, "src/plugin/firebase.js", "src/plugin/firebase.js"  ],
+  ],
   "exclude": [
     "node_modules"
   ]

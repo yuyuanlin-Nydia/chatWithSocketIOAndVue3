@@ -29,7 +29,10 @@ const currentRoomUser = computed(() => {
 })
 
 watch(() => chatDetailRef.value?.isFocus, (newVal) => { // 如果輸入框有聚焦 收到的訊息要已讀
-  if (newVal && currentRoomUser.value?.unReadMsgAmount) { socket.emit('updateMsgWithRead', currentRoomUser.value.latestMsg.roomID) }
+  if (newVal && currentRoomUser.value?.unReadMsgAmount) {
+    socket.emit('updateMsgWithRead', currentRoomUser.value.latestMsg.roomID)
+    store.commit('roomModule/updateRoomWithRead')
+  }
 })
 
 socket.connect()
@@ -66,10 +69,14 @@ socket.on('connect', () => {
   socket.on('newMsgToClient', (msgData) => { // 聊天室的人收到
     store.commit('roomModule/addCurrentRoomMsg', msgData)
     store.commit('roomModule/updateRoomWithLatestMsg', msgData)
-    store.commit('roomModule/updateRoomWithUnreadAmount', msgData)
+    store.commit('roomModule/updateRoomWithUnreadAmount', { msgData, amount: +1 })
     if (chatDetailRef.value) {
       chatDetailRef.value.scrollToBtm()
     }
+  })
+
+  socket.on('updateRoomWithUnreadAmount', (msgData) => {
+    store.commit('roomModule/updateRoomWithUnreadAmount', { msgData, amount: -1 })
   })
 
   socket.on('updateMsgWithReadSuccess', () => {

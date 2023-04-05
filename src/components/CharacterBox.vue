@@ -142,5 +142,5 @@ function getLatestMsgFromNow (time: string) {
 }
 .borderLeft{
   border-left: 5px $bg-secondary solid;
- }
+}
 </style>

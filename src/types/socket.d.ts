@@ -15,6 +15,8 @@ interface ServerToClientEvents {
   loginStat:(value: number)=>void,
   currentRoomMsg:(msg: IMessage[]) => void
   updateMsgWithReadSuccess:() => void,
+  unsendMsgSuccess:(msgID: string) => void,
+  updateRoomWithUnreadAmount: (msgData: IMessage) => void
 }
 interface IAuthenticateCb {
   (message: {success: boolean}): void;
@@ -25,6 +27,7 @@ interface ClientToServerEvents {
   changeRoom:(msg: any) => void;
   authenticate:(msg: string, callback: IAuthenticateCb) => void,
   updateMsgWithRead:(msg: string) => void,
+  unsendMsg:(id: string) => void,
 }
 
 interface InterServerEvents {

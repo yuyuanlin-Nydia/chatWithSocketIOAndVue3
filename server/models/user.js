@@ -17,7 +17,7 @@ const userSchema = new Schema({
   },
   isOnline: {
     type: Number,
-    default: 0
+    default: 1
   },
   registerDate: {
     type: Date,

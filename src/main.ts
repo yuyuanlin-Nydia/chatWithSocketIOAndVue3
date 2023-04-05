@@ -8,11 +8,13 @@ import '@fortawesome/fontawesome-free/css/all.css'
 import { Quasar } from 'quasar'
 import quasarUserOptions from './quasar-user-options'
 import axiosInstance from './plugin/axios'
+import vClickOutside from 'click-outside-vue3'
 
 const app = createApp(App)
 app.provide('$axios', axiosInstance)
 app.use(Quasar, quasarUserOptions)
   .use(store)
   .use(router)
+  .use(vClickOutside)
   .component('font-awesome-icon', FontAwesomeIcon)
   .mount('#app')

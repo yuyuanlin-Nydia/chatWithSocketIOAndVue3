@@ -12,7 +12,6 @@ const socket: Socket<ServerToClientEvents, ClientToServerEvents> = io(URL,
     }
   }
 )
-console.log(socket.auth)
 // onAny 可以讓所有server的訊息都出現在console=>production時適合
 socket.onAny((event, ...args) => {
   console.log(event, args)

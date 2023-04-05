@@ -21,9 +21,10 @@ mongoDB使用explain查詢報錯 => Option "explain" cannot be used on an aggreg
 https://github.com/Automattic/mongoose/issues/9025
 
 預計新增功能:
+*表情符號
 *暗黑模式
-*新增編輯/刪除訊息
 *訊息上傳圖片/檔案
 *新增群組
 *撥打電話
 *設定個人檔案圖片
+*收回訊息 2023.4.5

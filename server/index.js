@@ -6,7 +6,8 @@ const express = require('express')
 const { createServer } = require('http')
 const { Server } = require('socket.io')
 const cors = require('cors')
-const { connectMongoDB } = require('./mongoose')
+const { connectMongoDB } = require('./db')
+const mongoose = require('mongoose')
 const { userRouter } = require('./routes/user')
 const app = express()
 
@@ -86,7 +87,8 @@ io.on('connection', (socket) => {
                       { $in: ['$from', ['$$userId', socket.userData._id]] },
                       { $in: ['$to', ['$$userId', socket.userData._id]] }
                     ]
-                  }
+                  },
+                  isUnsend: false
                 }
               },
               { $sort: { sendAt: -1 } },
@@ -114,6 +116,7 @@ io.on('connection', (socket) => {
                 $match: {
                   $expr: { $in: ['$roomID', '$$latestMsgRoomID'] },
                   isRead: false,
+                  isUnsend: false,
                   to: socket.userData._id
                 }
               },
@@ -149,26 +152,12 @@ io.on('connection', (socket) => {
         },
         { $sort: { 'latestMsg.sendAt': -1 } }
       ])
-
-      const allRooms = await Message.aggregate([
-        {
-          $match: {
-            roomID: { $regex: socket.userData._id.toString() }
-          }
-        },
-        { $group: { _id: '$roomID' } },
-        {
-          $group: {
-            _id: null,
-            roomIDs: { $push: '$_id' }
-          }
-        },
-        { $project: { _id: 0, roomIDs: 1 } }
-      ])
-      allRooms[0]?.roomIDs.forEach((room) => {
-        socket.join(room)
-      })
       socket.emit('userWithNewestMsg', userWithNewestMsg)
+      //先加入所有房間 才能接收到未讀訊息
+      userWithNewestMsg.forEach(user => {
+        const roomID = [socket.userData._id, user._id.toString()].sort((a, b) => a.localeCompare(b)).join('-')
+        socket.join(roomID)
+      })
     } catch (err) {
       console.log(err)
     }
@@ -207,6 +196,19 @@ io.on('connection', (socket) => {
       )
       socket.to(socket.roomID).emit('updateMsgWithReadSuccess')
     } catch (err) {
+      console.log(err)
+    }
+  })
+
+  socket.on('unsendMsg', async (msgID) => {
+    try{
+      const result = await Message.findOneAndUpdate(
+        { _id: mongoose.Types.ObjectId(msgID) },
+        { $set: { isUnsend: true } }
+      )
+      io.to(result.roomID).emit('unsendMsgSuccess', result)
+      socket.to(result.roomID).emit('updateRoomWithUnreadAmount',result)
+    }catch(err){
       console.log(err)
     }
   })

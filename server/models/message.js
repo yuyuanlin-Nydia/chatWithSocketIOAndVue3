@@ -25,6 +25,10 @@ const msgSchema = new Schema({
   isRead: {
     type: Boolean,
     default: false
+  },
+  isUnsend: {
+    type: Boolean,
+    default: false
   }
 })
 const Message = model('message', msgSchema)
