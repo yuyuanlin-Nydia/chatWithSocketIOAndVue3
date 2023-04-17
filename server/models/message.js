@@ -29,6 +29,20 @@ const msgSchema = new Schema({
   isUnsend: {
     type: Boolean,
     default: false
+  },
+  bulletin: {
+    isBulletin: {
+      type: Boolean,
+      default: false
+    },
+    bulletinBy: {
+      type: ObjectId,
+      default: null
+    },
+    updateAt: {
+      type: Date,
+      default: null
+    },
   }
 })
 const Message = model('message', msgSchema)

@@ -13,10 +13,12 @@ interface ServerToClientEvents {
   updateMembers:(b: any)=>void;
   userDisconnect:(value: any)=>void
   loginStat:(value: number)=>void,
-  currentRoomMsg:(msg: IMessage[]) => void
+  currentRoomMsg:(msg: IMessage[], bulletin: IBulletin[]) => void
   updateMsgWithReadSuccess:() => void,
   unsendMsgSuccess:(msgID: string) => void,
-  updateRoomWithUnreadAmount: (msgData: IMessage) => void
+  updateRoomWithUnreadAmount: (msgData: IMessage) => void,
+  addBulletinSuccess: (result: IBulletin) => void,
+  cancelBulletinSuccess: (id: string) => void
 }
 interface IAuthenticateCb {
   (message: {success: boolean}): void;
@@ -28,6 +30,8 @@ interface ClientToServerEvents {
   authenticate:(msg: string, callback: IAuthenticateCb) => void,
   updateMsgWithRead:(msg: string) => void,
   unsendMsg:(id: string) => void,
+  addBulletin: (id: string) => void,
+  cancelBulletin: (id: string) => void
 }
 
 interface InterServerEvents {

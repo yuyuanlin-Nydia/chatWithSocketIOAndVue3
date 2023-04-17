@@ -51,8 +51,9 @@ socket.on('connect', () => {
     isLoading.value = false
   })
 
-  socket.on('currentRoomMsg', (currentRoomMsg) => {
+  socket.on('currentRoomMsg', (currentRoomMsg: IMessage[], currentRoomBulletin: IBulletin[]) => {
     store.commit('roomModule/setCurrentRoomMsg', currentRoomMsg)
+    store.commit('roomModule/setCurrentRoomBulletin', currentRoomBulletin)
     if (chatDetailRef.value) {
       chatDetailRef.value.scrollToBtm()
     }

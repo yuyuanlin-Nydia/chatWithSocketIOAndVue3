@@ -1,5 +1,5 @@
 const path = require('path')
-const dotenv = require("dotenv");
+const dotenv = require('dotenv')
 const User = require('./models/user')
 const Message = require('./models/message')
 const express = require('express')
@@ -11,7 +11,7 @@ const mongoose = require('mongoose')
 const { userRouter } = require('./routes/user')
 const app = express()
 
-dotenv.config();
+dotenv.config()
 connectMongoDB()
 const httpServer = createServer(app)
 // 前端的http request會跨域
@@ -30,15 +30,15 @@ app
   .use(express.json())
   .use('/user', userRouter)
 
-const __dirname1=path.resolve()
+const __dirname1 = path.resolve()
 
-if(process.env.NODE_ENV === "production"){
-  app.use(express.static(path.join(__dirname1,'/dist')))
-  app.get('*',(req, res) => {
+if (process.env.NODE_ENV === 'production') {
+  app.use(express.static(path.join(__dirname1, '/dist')))
+  app.get('*', (req, res) => {
     res.sendFile(path.resolve(__dirname1, 'dist', 'index.html'))
   })
-}else{
-  app.get('/',(req, res)=>{
+} else {
+  app.get('/', (req, res) => {
     res.send('success')
   })
 }
@@ -153,7 +153,7 @@ io.on('connection', (socket) => {
         { $sort: { 'latestMsg.sendAt': -1 } }
       ])
       socket.emit('userWithNewestMsg', userWithNewestMsg)
-      //先加入所有房間 才能接收到未讀訊息
+      // 先加入所有房間 才能接收到未讀訊息
       userWithNewestMsg.forEach(user => {
         const roomID = [socket.userData._id, user._id.toString()].sort((a, b) => a.localeCompare(b)).join('-')
         socket.join(roomID)
@@ -168,12 +168,38 @@ io.on('connection', (socket) => {
       const currentRoomMsg = await Message.find(
         { roomID: socket.roomID }
       )
-      io.to(socket.roomID).emit('currentRoomMsg', currentRoomMsg)
+      const currentRoomBulletin = await Message.aggregate(
+        [
+          {
+            $match: {
+              roomID: socket.roomID,
+              'bulletin.isBulletin': true
+            }
+          },
+          { $sort: { 'bulletin.updateAt': -1 } },
+          {
+            $lookup: {
+              from: 'users',
+              localField: 'bulletin.bulletinBy',
+              foreignField: '_id',
+              as: 'user'
+            }
+          },
+          { $unwind: '$user' },
+          {
+            $project: {
+              msg: '$msg',
+              bulletinBy: '$user.userName',
+              bulletinAt: '$msg.bulletin.updateAt'
+            }
+          }
+        ]
+      )
+      io.to(socket.roomID).emit('currentRoomMsg', currentRoomMsg, currentRoomBulletin)
     } catch (err) {
       console.log(err)
     }
   })
-
   //   // TODO:新增群組
   //   // make all Socket instances join the "room1" room
   //   // io.socketsJoin('room1')
@@ -201,14 +227,73 @@ io.on('connection', (socket) => {
   })
 
   socket.on('unsendMsg', async (msgID) => {
-    try{
+    try {
       const result = await Message.findOneAndUpdate(
         { _id: mongoose.Types.ObjectId(msgID) },
         { $set: { isUnsend: true } }
       )
       io.to(result.roomID).emit('unsendMsgSuccess', result)
-      socket.to(result.roomID).emit('updateRoomWithUnreadAmount',result)
-    }catch(err){
+      socket.to(result.roomID).emit('updateRoomWithUnreadAmount', result)
+    } catch (err) {
+      console.log(err)
+    }
+  })
+
+  socket.on('addBulletin', async (msgID) => {
+    try {
+      console.log('addBulletin')
+      await Message.findOneAndUpdate(
+        { _id: mongoose.Types.ObjectId(msgID) },
+        {
+          $set: {
+            'bulletin.isBulletin': true,
+            'bulletin.bulletinBy': socket.userData._id,
+            'bulletin.updateAt': Date.now()
+          }
+        }
+      )
+      const result = await Message.aggregate([
+        { $match: { _id: mongoose.Types.ObjectId(msgID) } },
+        {
+          $lookup: {
+            from: 'users',
+            localField: 'bulletin.bulletinBy',
+            foreignField: '_id',
+            as: 'user'
+          }
+        },
+        {
+          $unwind: '$user'
+        },
+        {
+          $project: {
+            msg: '$msg',
+            bulletinBy: '$user.userName'
+          }
+        }
+      ])
+      io.to(socket.roomID).emit('addBulletinSuccess', result[0])
+    } catch (err) {
+      console.log(err)
+    }
+  })
+
+  socket.on('cancelBulletin', async (msgID, userID) => {
+    try {
+      const result = await Message.findOneAndUpdate(
+        { _id: mongoose.Types.ObjectId(msgID) },
+        {
+          $set: {
+            bulletin: {
+              isBulletin: false,
+              bulletinBy: null
+            }
+          }
+        },
+        { new: true }
+      )
+      io.to(result.roomID).emit('cancelBulletinSuccess', msgID)
+    } catch (err) {
       console.log(err)
     }
   })

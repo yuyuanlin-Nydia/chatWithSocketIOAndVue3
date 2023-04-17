@@ -5,7 +5,8 @@ const roomModule: Module<any, any> = {
   state: {
     allRooms: [],
     currentRoomUser: null,
-    currentRoomMsg: []
+    currentRoomMsg: [],
+    currentRoomBulletin: []
   },
   getters: {
     isCurrentRoom: (state) => (_id) => {
@@ -43,6 +44,15 @@ const roomModule: Module<any, any> = {
     },
     addCurrentRoomMsg (state, payload): void {
       state.currentRoomMsg.push(payload)
+    },
+    setCurrentRoomBulletin (state, payload: IBulletin[]): void {
+      state.currentRoomBulletin = payload
+    },
+    addCurrentRoomBulletin (state, payload: IBulletin): void {
+      state.currentRoomBulletin.unshift(payload)
+    },
+    cancelCurrentRoomBulletin (state, payload: string): void {
+      state.currentRoomBulletin = state.currentRoomBulletin.filter(msg => msg._id !== payload)
     },
     updateRoomWithLatestMsg (state, payload): void {
       state.allRooms.forEach((item) => {
