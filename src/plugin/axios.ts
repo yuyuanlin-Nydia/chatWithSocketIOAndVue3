@@ -11,7 +11,7 @@ declare module 'vue' {
   }
 }
 // 创建axios实例
-const axiosURL = process.env.NODE_ENV === 'production' ? 'https://chatwithsocketioandvue3.herokuapp.com' : 'http://localhost:3000'
+const axiosURL = process.env.NODE_ENV === 'production' ? 'https://chatwithsocketioandvue3.onrender.com' : 'http://localhost:3000'
 const instance: AxiosInstance = axios.create({
   baseURL: axiosURL
 })

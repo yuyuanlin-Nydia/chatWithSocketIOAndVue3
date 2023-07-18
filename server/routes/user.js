@@ -65,6 +65,8 @@ userRouter.post('/login', async (req, res) => {
 userRouter.post('/logout', auth, async (req, res) => {
   try {
     // 篩選掉當前的 Token
+    console.log(req.user)
+    console.log(auth)
     req.user.tokens = req.user.tokens.filter(token => token.token !== req.token)
     // 將包含剩餘 Token 的使用者資料存回資料庫
     await req.user.save()
