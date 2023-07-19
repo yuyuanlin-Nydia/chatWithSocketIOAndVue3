@@ -46,7 +46,7 @@
 
 <script lang="ts" setup>
 import socket from '@/utilities/socketConnection'
-import { computed, defineProps } from 'vue'
+import { computed } from 'vue'
 import { useStore } from 'vuex'
 import { dayjsTz, sortString } from '@/utilities/helper'
 import { getUserID } from '@/utilities/localStorage'

@@ -45,52 +45,52 @@ socket.on('connect', () => {
       }
     })
   }
+})
 
-  socket.on('userWithNewestMsg', (userWithNewestMsg) => {
-    store.commit('roomModule/setRooms', userWithNewestMsg)
-    isLoading.value = false
-  })
+socket.on('userWithNewestMsg', (userWithNewestMsg) => {
+  store.commit('roomModule/setRooms', userWithNewestMsg)
+  isLoading.value = false
+})
 
-  socket.on('currentRoomMsg', (currentRoomMsg: IMessage[], currentRoomBulletin: IBulletin[]) => {
-    store.commit('roomModule/setCurrentRoomMsg', currentRoomMsg)
-    store.commit('roomModule/setCurrentRoomBulletin', currentRoomBulletin)
-    if (chatDetailRef.value) {
-      chatDetailRef.value.scrollToBtm()
-    }
-  })
+socket.on('currentRoomMsg', (currentRoomMsg: IMessage[], currentRoomBulletin: IBulletin[]) => {
+  store.commit('roomModule/setCurrentRoomMsg', currentRoomMsg)
+  store.commit('roomModule/setCurrentRoomBulletin', currentRoomBulletin)
+  if (chatDetailRef.value) {
+    chatDetailRef.value.scrollToBtm()
+  }
+})
 
-  socket.on('newUserConnect', (newUser) => {
-    $q.notify({
-      message: newUser.userName + ' is online now!',
-      type: 'positive'
-    })
-    store.commit('roomModule/newUserConnect', newUser)
+socket.on('newUserConnect', (newUser) => {
+  $q.notify({
+    message: newUser.userName + ' is online now!',
+    type: 'positive'
   })
+  store.commit('roomModule/newUserConnect', newUser)
+})
 
-  socket.on('newMsgToClient', (msgData) => { // 聊天室的人收到
-    store.commit('roomModule/addCurrentRoomMsg', msgData)
-    store.commit('roomModule/updateRoomWithLatestMsg', msgData)
-    store.commit('roomModule/updateRoomWithUnreadAmount', { msgData, amount: +1 })
-    if (chatDetailRef.value) {
-      chatDetailRef.value.scrollToBtm()
-    }
-  })
+socket.on('newMsgToClient', (msgData) => { // 聊天室的人收到
+  store.commit('roomModule/addCurrentRoomMsg', msgData)
+  store.commit('roomModule/updateRoomWithLatestMsg', msgData)
+  store.commit('roomModule/updateRoomWithUnreadAmount', { msgData, amount: +1 })
+  if (chatDetailRef.value) {
+    chatDetailRef.value.scrollToBtm()
+  }
+})
 
-  socket.on('updateRoomWithUnreadAmount', (msgData) => {
-    store.commit('roomModule/updateRoomWithUnreadAmount', { msgData, amount: -1 })
-  })
+socket.on('updateRoomWithUnreadAmount', (msgData) => {
+  store.commit('roomModule/updateRoomWithUnreadAmount', { msgData, amount: -1 })
+})
 
-  socket.on('updateMsgWithReadSuccess', () => {
-    store.commit('roomModule/updateRoomWithRead')
-    store.commit('roomModule/updateAllMsgWithRead')
+socket.on('updateMsgWithReadSuccess', () => {
+  store.commit('roomModule/updateRoomWithRead')
+  store.commit('roomModule/updateAllMsgWithRead')
+})
+socket.on('userDisconnect', (userData) => {
+  $q.notify({
+    message: userData.userName + ' is offline now!',
+    type: 'negative'
   })
-  socket.on('userDisconnect', (userData) => {
-    $q.notify({
-      message: userData.userName + ' is offline now!',
-      type: 'negative'
-    })
-    store.commit('roomModule/setRoomIsOnline', userData)
-  })
+  store.commit('roomModule/setRoomIsOnline', userData)
 })
 
 socket.on('connect_error', (err) => {

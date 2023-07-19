@@ -25,6 +25,7 @@ const appModule: Module<any, any> = {
       state.isLogin = false
       clearToken()
       clearUserID()
+      socket.removeAllListeners()
       socket.disconnect()
       router.push({ name: PageName.Login })
       Notify.create({
@@ -62,6 +63,8 @@ const appModule: Module<any, any> = {
       const result = await postApi(ApiUrl.UserLogout, payload)
       if (result) {
         commit('setLogOut')
+        commit('roomModule/setCurrentRoomUser', null, { root: true })
+        commit('roomModule/setRooms', [], { root: true })
       }
     }
   }

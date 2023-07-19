@@ -13,7 +13,7 @@ const socket: Socket<ServerToClientEvents, ClientToServerEvents> = io(URL,
   }
 )
 // onAny 可以讓所有server的訊息都出現在console=>production時適合
-socket.onAny((event, ...args) => {
-  console.log(event, args)
-})
+// socket.onAny((event, ...args) => {
+//   console.log(event, args)
+// })
 export default socket

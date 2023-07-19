@@ -52,7 +52,7 @@ io.use((socket, next) => {
 
 io.on('connection', (socket) => {
   console.log('connected')
-  socket.on('authenticate', async (token, callback) => {
+  socket.once('authenticate', async (token, callback) => {
     try {
       socket.token = token
       socket.userData = await User.findOneAndUpdate(
@@ -200,10 +200,6 @@ io.on('connection', (socket) => {
       console.log(err)
     }
   })
-  //   // TODO:新增群組
-  //   // make all Socket instances join the "room1" room
-  //   // io.socketsJoin('room1')
-  //   // const sockets = await io.in('room1').fetchSockets()
 
   socket.on('privateMessage', async (msgData) => {
     try {

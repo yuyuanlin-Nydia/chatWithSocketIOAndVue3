@@ -18,10 +18,10 @@ interface IMessage {
   from: string,
   to: string,
   msg: string,
-  sendAt: string,
   isUnsend: boolean,
   isRead: boolean,
   bulletin: bulletinObj
+  sendAt?: string,
 }
 
 type IBulletin = Pick<IMessage, '_id' | 'msg'> & { bulletinBy: string }

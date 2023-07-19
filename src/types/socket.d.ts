@@ -25,7 +25,7 @@ interface IAuthenticateCb {
 }
 interface ClientToServerEvents {
   joinRoom: (msg: any) => void;
-  privateMessage:(b: any) =>void;
+  privateMessage:(msg: Pick<IMessage, 'roomID'| 'to' | 'from' | 'msg'>) =>void;
   changeRoom:(msg: any) => void;
   authenticate:(msg: string, callback: IAuthenticateCb) => void,
   updateMsgWithRead:(msg: string) => void,

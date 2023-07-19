@@ -247,8 +247,7 @@ async function msgSubmitHandler () {
     roomID,
     msg: inputMsg.value,
     to: currentRoomUser.value._id,
-    from: getUserID() as string,
-    sendAt: Date.now
+    from: getUserID() as string
   }
   socket.emit('privateMessage', msgData)
   inputMsg.value = ''
