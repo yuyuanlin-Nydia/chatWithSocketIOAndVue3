@@ -43,6 +43,8 @@ const roomModule: Module<any, any> = {
       state.currentRoomMsg = payload
     },
     addCurrentRoomMsg (state, payload): void {
+      const isChatRoomUser = payload.from === state.currentRoomUser?._id || payload.to === state.currentRoomUser?._id
+      if (!isChatRoomUser) return
       state.currentRoomMsg.push(payload)
     },
     setCurrentRoomBulletin (state, payload: IBulletin[]): void {
