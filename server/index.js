@@ -162,6 +162,15 @@ io.on('connection', (socket) => {
       console.log(err)
     }
   })
+  
+  socket.on('joinRoom', (roomID) => {
+    try {
+      socket.join(roomID)
+    } catch (err) {
+      console.log(err)
+    }
+  })
+
   socket.on('changeRoom', async (roomID) => {
     try {
       socket.roomID = roomID

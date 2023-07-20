@@ -1,4 +1,7 @@
 import { Module } from 'vuex'
+import socket from '@/utilities/socketConnection'
+import { sortString } from '@/utilities/helper'
+import { getUserID } from '@/utilities/localStorage'
 
 const roomModule: Module<any, any> = {
   namespaced: true,
@@ -20,7 +23,19 @@ const roomModule: Module<any, any> = {
     newUserConnect (state, payload): void {
       const userExist = state.allRooms.find(item => item.email === payload.email)
       if (!userExist) {
-        state.allRooms.push(payload)
+        const roomData = {
+          email: payload.email,
+          isOnline: 1,
+          latestMsg: null,
+          unReadMsgAmount: 0,
+          userName: payload.userName,
+          _id: payload._id
+        }
+        state.allRooms.push(roomData)
+
+        const sortedIds = sortString(payload._id, getUserID() as string)
+        const roomID = sortedIds.join('-')
+        socket.emit('joinRoom', roomID)
       } else {
         state.allRooms.forEach(item => {
           if (item.email === payload.email) {
@@ -71,6 +86,8 @@ const roomModule: Module<any, any> = {
     },
     updateRoomWithUnreadAmount (state, payload) {
       state.allRooms.forEach((item) => {
+        console.log(item)
+        console.log(payload.msgData.from)
         if (item._id === payload.msgData.from) {
           item.unReadMsgAmount = item.unReadMsgAmount + payload.amount
         }
