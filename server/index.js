@@ -204,7 +204,7 @@ io.on('connection', (socket) => {
           }
         ]
       )
-      io.to(socket.roomID).emit('currentRoomMsg', currentRoomMsg, currentRoomBulletin)
+      socket.emit('currentRoomMsg', currentRoomMsg, currentRoomBulletin)
     } catch (err) {
       console.log(err)
     }

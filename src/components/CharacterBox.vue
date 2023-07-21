@@ -63,10 +63,6 @@ function changeRoomHandler (roomData) {
   const sortedIds = sortString(roomData._id, getUserID() as string)
   const roomID = sortedIds.join('-')
   socket.emit('changeRoom', roomID)
-  if (roomData.unReadMsgAmount) {
-    store.commit('roomModule/updateRoomWithRead')
-    socket.emit('updateMsgWithRead', roomData.roomID)
-  }
 }
 function getLatestMsgFromNow (time: string) {
   return time

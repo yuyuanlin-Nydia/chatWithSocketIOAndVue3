@@ -30,8 +30,10 @@ const currentRoomUser = computed(() => {
 
 watch(() => chatDetailRef.value?.isFocus, (newVal) => { // 如果輸入框有聚焦 收到的訊息要已讀
   if (newVal && currentRoomUser.value?.unReadMsgAmount) {
-    socket.emit('updateMsgWithRead', currentRoomUser.value.latestMsg.roomID)
-    store.commit('roomModule/updateRoomWithRead')
+    setTimeout(() => {
+      socket.emit('updateMsgWithRead', currentRoomUser.value.latestMsg?.roomID)
+      store.commit('roomModule/updateRoomWithRead')
+    }, 300)
   }
 })
 

@@ -86,10 +86,11 @@ const roomModule: Module<any, any> = {
     },
     updateRoomWithUnreadAmount (state, payload) {
       state.allRooms.forEach((item) => {
-        console.log(item)
-        console.log(payload.msgData.from)
         if (item._id === payload.msgData.from) {
-          item.unReadMsgAmount = item.unReadMsgAmount + payload.amount
+          const newUnReadMsgAmount = item.unReadMsgAmount + payload.amount
+          item.unReadMsgAmount = newUnReadMsgAmount >= 0
+            ? newUnReadMsgAmount
+            : 0
         }
       })
     },
